@@ -97,6 +97,7 @@ let preConfig = [
   },
   {
     name: "ZenCoin", link: "https://t.me/theZencoin_bot/zencoin?startapp=r=1617075783",
+
   },
   { name: "Heart", link: "https://t.me/heart_game_bot/game?startapp=1617075783" }
 ]
@@ -111,14 +112,17 @@ class Game {
       requireMobile: false,
       requireMiniApp: false, // require play inside telegram environment (not external iframe link)
       requireInApp: false, // ex: moonbix can play only inside telegram app
-      
-      dailyCheck: {
-        available: true,
-        action: [],
+
+      dailyCheckIn: [], // sequence element to click
+      earn: {
+        tap: true, boost: [], // sequence element to click
+        task: [],
+        game: {
+          spiner: [], // sequence element to click
+          itemDropCatch: {}
+        }
       },
-      earn: [{ tap: true }],
-      farm: {},
-      boost: {},
+      mineCard: [], // element list
     };
     Object.assign(this, defaultConfig, gameObj);
 

@@ -54,7 +54,7 @@ window.addEventListener("DOMContentLoaded", () => {
           ipcRenderer.send('data', {
             name: 'profileUser', data: { uid: id, tagName: tagName }
           })
-        }, 3000)
+        }, 900)
       }
     }, 1000)
   }
