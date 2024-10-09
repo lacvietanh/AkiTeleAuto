@@ -75,7 +75,7 @@ class Profile {
       const numB = parseInt(b.replace('profile', ''), 10);
       return numA - numB;
     });
-    let profileData = store.get("profileData");
+    let profileData = store.get("profileData", {});
     const profileListObject = profileDir.map((dirName) => ({
       id: parseInt(dirName.replace("profile", ""), 10),
       name: dirName,
