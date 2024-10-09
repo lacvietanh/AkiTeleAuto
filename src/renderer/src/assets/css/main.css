@@ -1,0 +1,251 @@
+@import "./bulma.min.css";
+@import "./FA-611-Free.min.css";
+
+::-webkit-scrollbar-track {
+  box-shadow: inset 0 0 6px rgba(0, 0, 0, 0.302);
+  border-radius: 10px;
+  margin: 10px;
+  background-color: hsla(0, 1%, 23%, 0.612);
+}
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+::-webkit-scrollbar-thumb {
+  border-radius: 10px;
+  box-shadow: inset 0 0 5px rgba(0, 0, 0, .3);
+  background-color: #555;
+}
+
+
+#APP_TITLEBAR {
+  border-radius: 8px 8px 0 0;
+}
+button.mini {
+  line-height: unset !important;
+  padding: 0.1em 0.4em;
+  min-width: 0.4em;
+  height: auto;
+  box-shadow: #0008 0px 1px 3px 0px;
+  width: 2em;
+}
+.borderNONE {
+  border: none !important;
+}
+.UserSelectNONE {
+  user-select: none;
+}
+.w-fit {
+  width: fit-content;
+}
+.counter.parent {
+  counter-reset: countVar;
+}
+.counter.child::after {
+  counter-increment: countVar;
+  content: counter(countVar);
+}
+th:not(.DONT_SORTABLE) {
+  cursor: pointer;
+}
+
+/* CUSTOM APP TITLE BAR  */
+#APP_TITLEBAR.active {
+  background-color: #222;
+}
+#APP_TITLEBAR {
+  -webkit-app-region: drag;
+  user-select: none;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 30px;
+  z-index: 9999;
+  color: #eee;
+  background-color: #6836d294;
+  border-radius: 15px 15px 0 0;
+  transition: 0.2s;
+}
+#APP_TITLEBAR button {
+  -webkit-app-region: none;
+  cursor: pointer;
+  transition: 0.4s;
+}
+#APP_TITLEBAR .right {
+  padding: 3px 7px;
+  min-width: 170px;
+  height: 30px;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+#APP_TITLEBAR button:hover {
+  box-shadow:
+    0px 0px 5px 4px rgb(255 255 255 / 49%)
+}
+#APP_TITLEBAR .right button {
+  margin: 0 2px;
+  font-size: 12px;
+  height: 2em;
+  background-color: #b88a66;
+  border: none;
+  color: #fff;
+  font-weight: bold;
+}
+#APP_TITLEBAR.active .right button {
+  background-color: #ff8222;
+}
+.trafficLight {
+  margin-top: 5px;
+  margin-left: 10px;
+}
+#APP_TITLEBAR.active .trafficLight button {
+  opacity: 1;
+}
+.trafficLight button {
+  border-radius: 100%;
+  padding: 0;
+  height: 12px;
+  width: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-sizing: border-box;
+  margin-right: 3.5px;
+  background-color: #ddd;
+  position: relative;
+  outline: none;
+  opacity: 0.5;
+}
+.trafficLight .close {
+  background-color: #ff6159;
+}
+.trafficLight .min {
+  background-color: #ffbd2e;
+}
+.trafficLight .max {
+  background-color: #28c941;
+}
+/* SWITCH TOGGLE  */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 2.8em;
+  height: 1.5em;
+}
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+.slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ccc;
+  transition: .2s;
+  display: flex;
+  align-items: center;
+}
+.slider:before {
+  content: "";
+  height: 1em;
+  width: 1em;
+  margin-left: .3em;
+  background-color: white;
+  transition: .2s;
+}
+input:checked+.slider {
+  background-color: #48c78e;
+}
+input:checked+.slider:before {
+  transform: translateX(1.1em);
+}
+.slider.round {
+  border-radius: 34px;
+}
+.slider.round:before {
+  border-radius: 50%;
+}
+
+
+body {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow-y: overlay;
+  background-image: url('../img/wavy-lines.svg');
+  background-size: cover;
+  user-select: none;
+}
+
+#app {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+  margin-left: 52px;
+}
+
+.logo {
+  margin-bottom: 20px;
+  -webkit-user-drag: none;
+  height: 128px;
+  width: 128px;
+  will-change: filter;
+  transition: filter 300ms;
+}
+
+.logo:hover {
+  filter: drop-shadow(0 0 1.2em #6988e6aa);
+}
+
+.appName {
+  background: -webkit-linear-gradient(315deg, #42d392 25%, #647eff);
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.appDescription {
+  font-size: 14px;
+  line-height: 16px;
+  color: var(--ev-c-text-2);
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+
+
+.toats {
+  position: absolute;
+  bottom: 30px;
+  margin: 0 auto;
+  padding: 15px 0;
+  font-family: 'Menlo', 'Lucida Console', monospace;
+  display: inline-flex;
+  overflow: hidden;
+  align-items: center;
+  border-radius: 22px;
+  background-color: #202127;
+  backdrop-filter: blur(24px);
+}
+
+.toats li {
+  display: block;
+  float: left;
+  border-right: 1px solid var(--ev-c-gray-1);
+  padding: 0 15px;
+  font-size: 14px;
+  line-height: 14px;
+  opacity: 0.8;
+  &:last-child {
+    border: none;
+  }
+}

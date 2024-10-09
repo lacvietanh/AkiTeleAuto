@@ -1,0 +1,61 @@
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Game</title>
+</head>
+
+<body>
+
+  <style>
+    .AkiPanel button.red {
+      background: red;
+      color: yellow;
+    }
+
+    .AkiPanel button {
+      padding: 3px 4px;
+      margin: 2px 3px;
+      background: darkred;
+      border-radius: 5px;
+    }
+
+    .AkiPanel {
+      position: fixed;
+      top: 10px;
+      right: 50px;
+      width: 90vw;
+      transform: translateX(100%);
+      transition: all .3s;
+      background: #373737;
+      z-index: 999;
+      border-radius: 4px;
+    }
+
+    .AkiPanel.expand {
+      right: 0;
+      transform: translateX(0);
+    }
+
+    .AkiPanel::before {
+      content: '<'
+    }
+
+    .AkiPanel.expand::before {
+      content: '>'
+    }
+  </style>
+  <div class=AkiPanel>
+    <button class=red onclick="this.parentElement.classList.toggle('expand')">Aki</button>
+    <button onclick="history.back()">BACK</button>
+    <button onclick="api.injectAndroid()">injectAndroid</button>
+    <button onclick="api.openIFrameURL()">OpenIframeURL</button>
+    <button onclick="api.autoPointerClick()">AutoClickCenter</button>
+    <input type="range" name="clickCount" id="clickCount" min="100" max="10000">
+    <input type="range" name="clickTimeout" id="clickTimeout" min="5" max="60">
+  </div>
+
+</body>
+
+</html>
