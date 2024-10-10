@@ -48,17 +48,22 @@ class Profile {
     let textLog = id ? 'open' : 'created new';
     console.log(textLog + ' profile id', this.id, 'BrowserId:', this.wd.id, 'url:', url);
     windowList.set(this.id, { wid: this.wd.id, url: url })
+
+    this.wd.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url)
+      return { action: 'deny' }; // Ngăn chặn mở app ngoài
+    })
+
     this.wd.once("ready-to-show", () => {
-      this.wd.setTitle('profile' + this.id)
       let gameWindow = BrowserWindow.getAllWindows().length - 2;
       this.wd.setPosition(200 * gameWindow, 0 * gameWindow, true)
       mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
       mainWindow.webContents.send('data', { name: 'windowList', data: windowList })
     })
-    this.wd.webContents.setWindowOpenHandler(({ url }) => {
-      shell.openExternal(url)
-      return { action: 'deny' }; // Ngăn chặn mở app ngoài
-    });
+
+    this.wd.once("did-finish-load", () => {
+      this.wd.setTitle('profile' + this.id)
+    })
 
     this.wd.loadURL(url)
     return this.wd.id
@@ -234,15 +239,23 @@ app.whenReady().then(() => {
         console.log('saved profileData:', data);
         mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
         break;
+      case 'gameAvt':
+        console.log('received game Avt for gameId:', mess.gameId)
+        let g = Game.list.find(g => g.gameId == mess.gameId)
+        g.avt = mess.data
+        store.set(`Games.${g.gameId}`, g)
+        mainWindow.webContents.send('data',
+          { name: 'gameInfo', data: { gameId: mess.gameId, obj: g } })
+        break;
       default: console.log('ipcMain received "data" but', mess.name, 'not defined yet!'); break;
     }
   })
 
-  ipcMain.handle('get-game-data', (event, gameId) => {
+  ipcMain.handle('get-game-data', (ev, gameId) => {
     // gameWindow sẽ gọi cái này 2 lần
-    let out = Game.list.find(g => g.gameId == gameId);
-    console.log('requested game data:', out);
-    return out
+    let g = Game.list.find(g => g.gameId == gameId);
+    console.log('requested game data from ', ev.sender.getURL().slice(0, 30), g);
+    return g
   });
 
   ipcMain.on('log', (ev, mess) => console.log(mess))

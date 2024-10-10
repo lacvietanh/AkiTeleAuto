@@ -1,3 +1,5 @@
+import Store from 'electron-store';
+const store = new Store();
 
 // requireInApp -> requireMiniApp -> requireMobile
 let preConfig = [
@@ -5,20 +7,13 @@ let preConfig = [
     name: "Moonbix", link: "https://t.me/Binance_Moonbix_bot/start?startapp=ref_1617075783&startApp=ref_1617075783"
     , requireMobile: true
     , requireInApp: true
-    , dailyCheck: {
-      available: false
-    }
   },
   {
     name: "CATS", link: "t.me/catsgang_bot/join?startapp=tYbaLFnf8HNHZ3n_vG38F"
-    , avt: 'catsgang_bot'
     , requireMiniApp: true
   },
   {
     name: "MoneyDogs", link: "https://t.me/money_dogs_bot/money_dogs?startapp=JFx1iNTE",
-    dailyCheck: {
-      available: true
-    }
   },
   {
     name: "HamsterKombat", link: "https://t.me/haMster_kombat_bot/start?startapp=kentId1617075783",
@@ -27,12 +22,10 @@ let preConfig = [
   {
     name: "Agent 301", link: "https://t.me/Agent301Bot/app?startapp=onetime1617075783"
     , requireMiniApp: true
-
   },
   {
     name: "1winToken", link: "http://t.me/token1win_bot/start?startapp=refId1617075783"
     , requireMobile: true
-
   },
   {
     name: "BOOMS", link: "https://t.me/booms_io_bot/start?startapp=bro1617075783"
@@ -44,11 +37,11 @@ let preConfig = [
   },
   { name: "Major", link: "https://t.me/major/start?startapp=1617075783" },
   { name: "BITS", link: "https://t.me/BitsTonboxBot/BitsAirdrops?startapp=L8rLKQ5ZqJVhYE1Vx5jePy" },
-  { name: "Bombie", link: "https://t.me/catizenbot/bombie?startapp=g_1002_24660687" },
+  { name: "CatizenGameCenter", link: "https://t.me/catizenbot/gamecenter?startapp=p_24660687" },
   { name: "Catizen", link: "https://t.me/catizenbot/gameapp?startapp=r_424_25641724" },
+  { name: "Bombie", link: "https://t.me/catizenbot/bombie?startapp=g_1002_24660687" },
   { name: "Sunkong", link: "https://t.me/sunkongmyth_bot/sunkong_miniapp?startapp=139FE7A52" },
   { name: "Boinkers", link: "https://t.me/boinker_bot/boinkapp?startapp=boink1617075783" },
-  { name: "TimeFarm", link: "https://t.me/TimeFarmCryptoBot?start=ewpWKMx5QA1Vjm3m" },
   { name: "SEED", link: "t.me/seed_coin_bot/app?startapp=1617075783" },
   {
     name: "Blum", link: "https://t.me/blum/app?startapp=ref_IDq1XTu1E2",
@@ -61,7 +54,6 @@ let preConfig = [
   {
     name: "MidasYielder", link: "https://t.me/MidasRWA_bot/app?startapp=ref_54bd2269-a3f5-4224-a040-b01830db89b9"
     , requireMiniApp: true
-
   },
   {
     name: "Mnemonics", link: "https://t.me/mnmncs_bot/gameapp?startapp=KA7aDv4R",
@@ -83,6 +75,10 @@ let preConfig = [
   { name: "Coub", link: "https://t.me/coub/app?startapp=coub__marker_20181360" },
   { name: "trust_app", link: "https://t.me/trust_empire_bot/trust_app?startapp=1cc5170a-2f84-4f94-9941-ba01c0f28f81" },
   {
+    name: "TimeFarm", link: "https://t.me/TimeFarmCryptoBot?start=ewpWKMx5QA1Vjm3m"
+    , launchBtnInBotChat: '.is-web-view.reply-markup-button.rp'
+  },
+  {
     name: "Fintopio", link: "https://t.me/fintopio/wallet?startapp=reflink-reflink_h5vWbSndCMoyEBSG-"
     , requireMiniApp: true
   },
@@ -90,7 +86,6 @@ let preConfig = [
     name: "TON Kombat", link: "https://t.me/Ton_kombat_bot/app?startapp=1617075783"
     , requireMiniApp: true
   },
-
   {
     name: "Tomarket", link: "t.me/Tomarket_ai_bot/app?startapp=0002btvW",
     requireMiniApp: true,
@@ -99,7 +94,18 @@ let preConfig = [
     name: "ZenCoin", link: "https://t.me/theZencoin_bot/zencoin?startapp=r=1617075783",
 
   },
-  { name: "Heart", link: "https://t.me/heart_game_bot/game?startapp=1617075783" }
+  { name: "Heart", link: "https://t.me/heart_game_bot/game?startapp=1617075783" },
+  { name: "Nordom", link: "https://t.me/nordom_gates_bot/open?startapp=YgcyB0" },
+  {
+    name: "HatchCat", link: "https://t.me/hash_cats_bot?start=rQYJoy1gH1"
+    , requireMobile: false
+  },
+  {
+    name: "ZESH", link: "https://t.me/ZeshToTheMoonBot?start=PY8PHZHi7Vtz",
+    launchBtnInBotChat: '.new-message-bot-commands.is-view'
+    // requireMobile: false
+    // requireMiniApp: true,
+  },
 ]
 preConfig.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -112,6 +118,7 @@ class Game {
       requireMobile: false,
       requireMiniApp: false, // require play inside telegram environment (not external iframe link)
       requireInApp: false, // ex: moonbix can play only inside telegram app
+      launchBtnInBotChat: '',
 
       dailyCheckIn: [], // sequence element to click
       earn: {
@@ -133,17 +140,22 @@ class Game {
     // console.log(this.botId);
     this.gameId = this.link.match(/https:\/\/t\.me\/([^\/?]+\/[^?]+|[^\/?]+)/)[1];
     // console.log(this.gameId);
-
-    this.avtLink = ""
-    Game.list.push(this);
+    return this
   }
 
 
   static list = [];
 
   static init() {
-    preConfig.forEach(g => new Game(g));
+    let infoStored = store.get('Games', {})
+    preConfig.forEach(g => {
+      let game = new Game(g)
+      game.avt = infoStored[game.gameId]?.avt || ''
+      Game.list.push(game);
+    });
   }
 }
 
 export default Game;
+
+

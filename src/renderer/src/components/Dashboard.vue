@@ -1,7 +1,7 @@
 <script setup>
-  window.$id = (id) => { return document.getElementById(id) }
-  window.$qs = (s) => { return document.querySelector(s) }
-  window.$qsa = (s) => { return document.querySelectorAll(s) }
+  window.$id = (id) => document.getElementById(id)
+  window.$qs = (s) => document.querySelector(s)
+  window.$qsa = (s) => document.querySelectorAll(s)
   window.mainLog = (s, hereLog = 0) => {
     ipcRenderer.send('log', s)
     if (hereLog == 1) console.log(s);
@@ -10,6 +10,8 @@
   import { onMounted, computed, reactive } from 'vue';
   import { debounce } from 'lodash';
   import AppIcon from '../assets/img/icon.png';
+
+  const windowList = new Map()
 
   const Game = reactive({
     list: []
@@ -27,6 +29,11 @@
       if (!Profile.selected) Profile.selected = 'profile1'
       let profileid = parseInt(Profile.selected.replace('profile', ''), 10);
       api.ipcAction('openGame', { profileid: profileid, link: link, gameId: gameId })
+    }
+    , openAll: function () {
+      alert('under development..')
+    }, updateData: function (gameObj) {
+
     }
   })
 
@@ -77,9 +84,15 @@
           })
         }, 500)
         break;
-      case "games":
-        Game.list = window.Game = mess.data
+      case "games": Game.list = window.Game = mess.data; break;
+      case "gameInfo":
+        // console.log('received game info for ', mess.data.gameId); // debug
+        let g = Game.list.find(g => g.gameId == mess.data.gameId);
+        Object.assign(g, mess.data.obj)
         break;
+      case "windowList": mess.data.forEach((value, key) => {
+        windowList.set(key, value);
+      }); break;
       default: console.log('ipcRender received "data" but', mess.name, 'not defined yet!');
         break;
     }
@@ -169,6 +182,32 @@
 
     <article class="GAME panel m-3 is-dark">
       <p class="panel-heading py-2">Games/MiniApps <span class="is-size-6">({{ Game.list.length }})</span></p>
+      <p class="panel-tabs">
+        <a class="is-active">
+          <i class="fa-solid fa-calendar-check"></i>
+          Open All
+        </a>
+        <a class="is-active">
+          <i class="fa-solid fa-hourglass-start"></i>
+          Reload
+        </a>
+      </p>
+      <a class="panel-block px-2 py-1" style="cursor:default">
+        <button v-if="Profile.list.length > 0" class="button is-small is-flex is-justify-content-center mx-auto" @click="Profile.login">
+          <span class="panel-icon p-0 is-size-5 mr-2">
+            <i class="fa-brands fa-telegram"></i>
+          </span>
+          <span>Telegram</span>
+        </button>
+        <button class="button is-small is-flex is-justify-content-center mx-auto" @click="Game.openAll">
+          <span class="panel-icon p-0 is-size-5 mr-2">
+            <i class="fa-solid fa-gavel"></i>
+          </span>
+          <span>OpenAll</span>
+        </button>
+      </a>
+
+      <!-- GAME SEARCH  -->
       <div class="panel-block">
         <p class="control has-icons-left">
           <input type="search" class="input is-small is-dark" v-model="Game.searchTerm" @input="Game.updateSearchTerm($event.target.value)" />
@@ -177,38 +216,15 @@
           </span>
         </p>
       </div>
-      <!-- <p class="panel-tabs">
-        <a class="is-active">
-          <i class="fa-solid fa-calendar-check"></i>
-          Check-in
-        </a>
-        <a class="is-active">
-          <i class="fa-solid fa-hourglass-start"></i>
-          Farm
-        </a>
-        <a class="is-active">
-          <i class="fa-solid fa-coins"></i>
-          Earn
-        </a>
-      </p> -->
-      <!-- Open Telegram Button -->
-      <a class="panel-block px-2 py-1" style="cursor:default">
-        <button v-if="Profile.list.length > 0" class="button is-small is-flex is-justify-content-center mx-auto"
-          @click="Profile.login">
-          <span class="panel-icon p-0 is-size-5 mr-2">
-            <i class="fa-brands fa-telegram"></i>
-          </span>
-          <span>Telegram</span>
-          <span class="icon"><i class="fa-solid fa-arrow-up-right-from-square"></i></span>
-        </button>
-      </a>
-      <!-- Open Games buttons -->
+      <!-- GAME LIST  -->
       <div class="vscroll-container">
         <div v-for="(g, i) in Game.filteredGames" :key="i" class="panel-block px-2 py-1">
           <div class="counter"><span class="help mr-1" style="width: 2em;">{{ i + 1 }}</span></div>
           <div class="iconName mr-2">
             <span class="panel-icon p-0 is-size-3 mr-2">
-              <img :src="g.avtLink || AppIcon" width="32" height="32">
+              <figure class="image" style="height: 36px;width: 36px;">
+                <img class=" is-rounded" :src="g.avt || AppIcon" />
+              </figure>
             </span>
             <div class="name is-flex is-justify-content-space-between">
               <div>{{ g.name }}</div>
