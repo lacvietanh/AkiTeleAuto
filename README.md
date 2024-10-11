@@ -8,7 +8,7 @@ roadmap:
 1. Auto farm by game settings (image 2)
 2. Right click show pannel in game window
 3. Schedule/cron job (auto close when auto done, schedule time for open -> claim, tap, upgrade mine card, ..)
+![Screenshot 2024-10-11 at 20 35 47](https://github.com/user-attachments/assets/ba993d1a-ab57-45fd-9230-f9bc8ea9ed3e)
 
-![Screenshot 2024-10-10 at 18 43 49](https://github.com/user-attachments/assets/429af9f7-ae15-479f-a47d-520be79d3acf)
 
 ![image](https://github.com/user-attachments/assets/07111471-a7a1-4d5f-843e-81d744afdc56)
