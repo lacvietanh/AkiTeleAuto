@@ -191,9 +191,6 @@ app.whenReady().then(() => {
   app.commandLine.appendSwitch('disable-site-isolation-trials')
   electronApp.setAppUserModelId('com.aki.teleauto') // need on windows
   // see https://github.com/alex8088/electron-toolkit/tree/master/packages/utils
-  app.on('browser-window-created', (_, window) => {
-    optimizer.watchWindowShortcuts(window)
-  })
 
   createMainWindow()
 
