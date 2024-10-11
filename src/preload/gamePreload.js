@@ -69,7 +69,8 @@ const api = {
   randomRange: (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
-  autoPointerClick: (x = window.innerWidth / 2, y = window.innerHeight / 2) => {
+  autoPointerClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2) {
+    const delay = api.randomRange(30, 120);
     api._autoClickInterval = setInterval(() => {
       const target = document.elementFromPoint(x, y);
       const range = 50; // random range
@@ -78,7 +79,8 @@ const api = {
       target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
       target.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
       target.dispatchEvent(new PointerEvent('click', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
-    }, api.randomRange(30, 150));
+    }, delay);
+    return delay
   }
 }
 
@@ -115,27 +117,28 @@ if (process.contextIsolated) {
 })()
 
 document.addEventListener('mousedown', function (ev) {
-  if (ev.shiftKey && ev.button === 0) {
-    // Thực hiện hành động khi nhấn Shift + Chuột trái
+  if (!ev.ctrlKey && !ev.altKey && ev.shiftKey && ev.button === 0) {
+    // shift + Lclick = AutoClick
     if (api._autoClickInterval == null) {
+      let delay = api.autoPointerClick(ev.clientX, ev.clientY)
       let div = document.createElement('div')
       div.id = "aki_autoclickLabel"
-      div.innerText = "AUTOCLICK: ON";
+      div.innerText = `AUTOCLICK: ${delay}ms`;
       // move for prevent click target itself:
       let X = ev.clientX + 10, Y = ev.clientY + 10;
-      div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 999;font-weight: bold;`;
+      div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
       document.body.appendChild(div)
-      api.autoPointerClick(ev.clientX, ev.clientY)
     } else {
       $qs('div#aki_autoclickLabel').remove()
       clearInterval(api._autoClickInterval); api._autoClickInterval = null
     }
+  } else if (ev.ctrlKey && ev.altKey && !ev.shiftKey) {
+    // ctrl + alt + Lclick = InspectElement
+    api.InspectAtMouse(ev.clientX, ev.clientY)
   }
 });
 addEventListener('contextmenu', (ev) => {
-  if (ev.altKey) {
-    api.InspectAtMouse(ev.clientX, ev.clientY);
-  } else if (ev.shiftKey) {
+  if (ev.shiftKey) {
     history.go(-1)
   }
 })

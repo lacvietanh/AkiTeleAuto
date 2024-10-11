@@ -22,9 +22,10 @@ const api = {
   }
 }
 
-addEventListener('contextmenu', (ev) => {
-  if (ev.altKey) {
-    api.InspectAtMouse(ev.clientX, ev.clientY);
+document.addEventListener('mousedown', function (ev) {
+  if (ev.ctrlKey && ev.altKey && !ev.shiftKey) {
+    // ctrl + alt + Lclick = InspectElement
+    api.InspectAtMouse(ev.clientX, ev.clientY)
   }
 })
 
