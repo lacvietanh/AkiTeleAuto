@@ -73,8 +73,9 @@
 
     openAll: function (btnClicked) {
       btnClicked.disabled = true;
-      let limited_list = $qsa('.GAME .inSelectedRange .panelRight button.firstAvailable')
-      limited_list.forEach(b => { Game.waitToClick(b) })
+      let listToOpen = $qsa('.GAME .inSelectedRange .panelRight button.firstAvailable')
+      listToOpen.forEach(b => { Game.waitToClick(b) })
+      setTimeout(() => { btnClicked.disabled = false }, listToOpen.length * 3 * 1000)
     },
 
     updateData: function (gameObj) {
