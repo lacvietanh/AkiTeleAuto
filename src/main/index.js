@@ -45,9 +45,16 @@ class Profile {
 
       }
     })
+    windowList.set(this.id, { wid: this.wd.id, gameId: gameId })
     let textLog = id ? 'open' : 'created new';
     console.log(textLog + ' profile id', this.id, 'BrowserId:', this.wd.id, 'url:', url);
-    windowList.set(this.id, { wid: this.wd.id, url: url })
+
+    // Keep window title as profile user displayName:
+    let profileName = 'profile' + this.id
+    let displayName =
+      store.get("profileData", {})[profileName]?.displayName || profileName
+    this.wd.setTitle(`${displayName.slice(0, 10)} | ${gameId}`)
+    this.wd.on("page-title-updated", (ev) => ev.preventDefault())
 
     this.wd.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url)
@@ -59,10 +66,6 @@ class Profile {
       this.wd.setPosition(200 * gameWindow, 0 * gameWindow, true)
       mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
       mainWindow.webContents.send('data', { name: 'windowList', data: windowList })
-    })
-
-    this.wd.once("did-finish-load", () => {
-      this.wd.setTitle('profile' + this.id)
     })
 
     this.wd.loadURL(url)
@@ -150,7 +153,6 @@ function createMainWindow() {
 
   mainWindow.webContents.setWindowOpenHandler((details) => {
     shell.openExternal(details.url)
-    // mainWindow.loadURL(details.url)
     return { action: 'deny' }
   })
 
@@ -158,7 +160,7 @@ function createMainWindow() {
   // Load the remote URL for development or the local html file for production.
   if (is.dev && process.env['ELECTRON_RENDERER_URL']) {
     mainWindow.loadURL(process.env['ELECTRON_RENDERER_URL'])
-    // shell.showItemInFolder(app.getPath("userData")) // DEB
+    shell.showItemInFolder(app.getPath("userData")) // DEB
   } else {
     mainWindow.loadFile(path.join(__dirname, '../renderer/index.html'))
   }
