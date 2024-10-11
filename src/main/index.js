@@ -11,13 +11,11 @@ import Game from './game.js';
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
 
 // ---------------------- var / const / init ----------------------
-const store = new Store();
-
 let mainWindow = {}
+const store = new Store();
 const windowList = new Map(); // { profile: {wid, url} }
 const partitionDir = path.join(app.getPath('userData'), 'Partitions')
 fs.existsSync(partitionDir) || fs.mkdirSync(partitionDir, { recursive: true });
-
 
 // ---------------------- Object / Classess ----------------------
 class Profile {
@@ -28,16 +26,20 @@ class Profile {
     let wdType = gameId ? 'gameWindow' : 'loginWindow'
 
     this.wd = new BrowserWindow({
-      width: 400, height: 650,
+      width: 400, height: 680,
       minHeight: 250, minWidth: 200,
+      maxHeight: 900, maxWidth: 600,
       show: true,
+      transparent: true,
+      frame: false,
+      maximizable: false,
       autoHideMenuBar: true,
       ...(process.platform === 'linux' ? { icon } : {})
       , webPreferences: {
         preload: path.join(__dirname, '../preload/gamePreload.js')
         , additionalArguments: ['--akiWindowType=' + wdType, '--akiGameId=' + gameId]
         , partition: "persist:profile" + this.id
-        , webSecurity: false
+        , devTools: app.isPackaged ? false : true
         , sandbox: false
         , contextIsolation: false
         // , nodeIntegration: true // Cho phép sử dụng Node.js trong script preload
@@ -45,30 +47,34 @@ class Profile {
 
       }
     })
+
     windowList.set(this.id, { wid: this.wd.id, gameId: gameId })
     let textLog = id ? 'open' : 'created new';
     console.log(textLog + ' profile id', this.id, 'BrowserId:', this.wd.id, 'url:', url);
 
     // Keep window title as profile user displayName:
     let profileName = 'profile' + this.id
-    let displayName =
-      store.get("profileData", {})[profileName]?.displayName || profileName
-    this.wd.setTitle(`${displayName.slice(0, 10)} | ${gameId}`)
-    this.wd.on("page-title-updated", (ev) => ev.preventDefault())
+    let displayName = store.get("profileData", {})[profileName]?.displayName || profileName
+    this.wd.setTitle(`${displayName} | ${gameId}`)
+    this.wd.webContents.on("page-title-updated", (ev) => { ev.preventDefault() })
+    this.wd.webContents.on("dom-ready", () => {
+      this.wd.webContents.send('data', { name: 'profileDisplayName', data: displayName.slice(0, 10) })
+    });
+    this.wd.loadURL(url)
 
     this.wd.webContents.setWindowOpenHandler(({ url }) => {
       shell.openExternal(url)
       return { action: 'deny' }; // Ngăn chặn mở app ngoài
     })
 
+    let gameWindow = BrowserWindow.getAllWindows().length - 2;
     this.wd.once("ready-to-show", () => {
-      let gameWindow = BrowserWindow.getAllWindows().length - 2;
-      this.wd.setPosition(200 * gameWindow, 0 * gameWindow, true)
-      mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
+      this.wd.setPosition(100 * gameWindow, (this.id - 1) * 200, true)
       mainWindow.webContents.send('data', { name: 'windowList', data: windowList })
+      if (wdType == 'loginWindow')
+        mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
     })
 
-    this.wd.loadURL(url)
     return this.wd.id
   }
 
@@ -137,7 +143,7 @@ class Profile {
 // ---------------------- function ----------------------
 function createMainWindow() {
   mainWindow = new BrowserWindow({
-    width: 800,
+    width: 900,
     height: 768,
     minHeight: 250,
     minWidth: 400,
@@ -147,6 +153,7 @@ function createMainWindow() {
     webPreferences: {
       preload: path.join(__dirname, '../preload/mainPreload.js')
       , sandbox: false
+      , devTools: app.isPackaged ? false : true
       // , contextIsolation: false
     }
   })
@@ -176,8 +183,6 @@ async function fetchBE(tagname) {
   let displayName = $('div.tgme_page_title').text().trim();
   return { avt, displayName };
 }
-
-
 
 
 Game.init()
@@ -212,6 +217,7 @@ app.whenReady().then(() => {
       case 'loadURL': senderWd.loadURL(mess.data.url); break;
       case 'inspect-at': ev.sender.inspectElement(mess.data.x, mess.data.y); break;
       case 'closethiswindow': senderWd.close(); break;
+      case 'minizethiswindow': senderWd.minimize(); break;
       default: console.log('ipcMain received "action" but', mess.name, 'not defined yet!'); break;
     }
   })
@@ -256,7 +262,7 @@ app.whenReady().then(() => {
   ipcMain.handle('get-game-data', (ev, gameId) => {
     // gameWindow sẽ gọi cái này 2 lần
     let g = Game.list.find(g => g.gameId == gameId);
-    console.log('requested game data from ', ev.sender.getURL().slice(0, 30), g);
+    // console.log('requested game data from ', ev.sender.getURL().slice(0, 30), g); //debug
     return g
   });
 

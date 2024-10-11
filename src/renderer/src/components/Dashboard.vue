@@ -14,7 +14,16 @@
   const windowList = new Map()
 
   const Game = reactive({
-    list: []
+    list: [],
+
+    highLightFirstAvailable: () => {
+      setTimeout(() => {
+        $qsa('.GAME .panelRight button')?.forEach(b => b.classList.remove('firstAvailable'));
+        $qsa('.GAME .panelRight')?.forEach(p => {
+          p.querySelector('button:not([disabled])')?.classList.add('firstAvailable')
+        })
+      }, 100);
+    }
     , searchTerm: ''
     , filteredGames: computed(() => {
       const searchTerm = Game.searchTerm.toLowerCase();
@@ -22,18 +31,54 @@
         return game.name.toLowerCase().includes(searchTerm);
       });
     })
+    , isLoadingOpen: false
     , updateSearchTerm: debounce(function (value) {
       this.searchTerm = value;
-    }, 300)
-    , open: (link, gameId) => {
+      this.limitOpenAllTo =
+        this.filteredGames.length > this.maximumOpenAll
+          ? this.maximumOpenAll
+          : this.filteredGames.length
+      Game.highLightFirstAvailable()
+    }, 300),
+
+    lastClickOpen: {},
+    open: (g, forceMode) => {
+      // FORCEMODE IS UNDER DEVELOPMENT
+      Game.lastClickOpen = g;
       if (!Profile.selected) Profile.selected = 'profile1'
       let profileid = parseInt(Profile.selected.replace('profile', ''), 10);
-      api.ipcAction('openGame', { profileid: profileid, link: link, gameId: gameId })
-    }
-    , openAll: function () {
-      alert('under development..')
-    }, updateData: function (gameObj) {
+      Game.isLoadingOpen = true;
+      api.ipcAction('openGame', { profileid: profileid, link: g.link, gameId: g.gameId, forceMode: forceMode })
+    },
 
+    openInAllProfiles: function (g) {
+      for (const p of Profile.list) {
+        Profile.selected = p.name; Game.open(g)
+      }
+    },
+
+    waitToClick(btn) {
+      if (!Game.isLoadingOpen) {
+        console.log('clicked', btn.title);
+        btn.click()
+      } else {
+        console.log('waitToClick', btn.title);
+        setTimeout(() => { Game.waitToClick(btn) }, 1000)
+      }
+    },
+
+    limitOpenAllFrom: 1,
+    limitOpenAllTo: 10,
+    maximumOpenAll: 15,
+
+    openAll: function (btnClicked) {
+      btnClicked.disabled = true;
+      let limited_list = $qsa('.GAME .inSelectedRange .panelRight button.firstAvailable')
+      limited_list.forEach(b => { Game.waitToClick(b) })
+    },
+
+    updateData: function (gameObj) {
+      // under development
     }
   })
 
@@ -77,22 +122,21 @@
       case "profiles":
         Profile.list = window.Profiles = mess.data;
         Profile.isLoadingAddNew = false
-        setTimeout(() => {
-          $qsa('.GAME .panelRight').forEach(p => {
-            let b = p.querySelector('button:not([disabled])')
-            b.classList.add('firstAvailable')
-          })
-        }, 500)
         break;
-      case "games": Game.list = window.Game = mess.data; break;
+      case "games": Game.list = window.Game = mess.data; Game.highLightFirstAvailable(); break;
       case "gameInfo":
         // console.log('received game info for ', mess.data.gameId); // debug
         let g = Game.list.find(g => g.gameId == mess.data.gameId);
         Object.assign(g, mess.data.obj)
         break;
-      case "windowList": mess.data.forEach((value, key) => {
-        windowList.set(key, value);
-      }); break;
+      case "windowList":
+        mess.data.forEach((value, key) => {
+          windowList.set(key, value);
+        });
+        Game.highLightFirstAvailable()
+        Game.isLoadingOpen = false
+        Game.lastClickOpen = {}
+        break;
       default: console.log('ipcRender received "data" but', mess.name, 'not defined yet!');
         break;
     }
@@ -126,7 +170,7 @@
           :class="{ 'selected': Profile.selected == profile.name }"
           @click="Profile.selected = profile.name">
           <div class="counter">
-            <span class="help mr-1" style="width: 2em;">{{ i + 1 }}</span>
+            <span style="width: 2em;" class="help">{{ i + 1 }}</span>
           </div>
           <div class="iconName">
             <span class="panel-icon p-0 is-size-3 mr-4">
@@ -182,31 +226,6 @@
 
     <article class="GAME panel m-3 is-dark">
       <p class="panel-heading py-2">Games/MiniApps <span class="is-size-6">({{ Game.list.length }})</span></p>
-      <p class="panel-tabs">
-        <a class="is-active">
-          <i class="fa-solid fa-calendar-check"></i>
-          Open All
-        </a>
-        <a class="is-active">
-          <i class="fa-solid fa-hourglass-start"></i>
-          Reload
-        </a>
-      </p>
-      <a class="panel-block px-2 py-1" style="cursor:default">
-        <button v-if="Profile.list.length > 0" class="button is-small is-flex is-justify-content-center mx-auto" @click="Profile.login">
-          <span class="panel-icon p-0 is-size-5 mr-2">
-            <i class="fa-brands fa-telegram"></i>
-          </span>
-          <span>Telegram</span>
-        </button>
-        <button class="button is-small is-flex is-justify-content-center mx-auto" @click="Game.openAll">
-          <span class="panel-icon p-0 is-size-5 mr-2">
-            <i class="fa-solid fa-gavel"></i>
-          </span>
-          <span>OpenAll</span>
-        </button>
-      </a>
-
       <!-- GAME SEARCH  -->
       <div class="panel-block">
         <p class="control has-icons-left">
@@ -216,10 +235,66 @@
           </span>
         </p>
       </div>
+
+      <!-- instructions  -->
+      <p class="panel-tabs is-size-7">
+        <span class="has-text-danger p-2">
+          <i class="fa-solid fa-gavel fa-lg"></i>
+          Open by All Profile
+        </span>
+        <span class="p-2">
+          <i class="fa-solid fa-rocket fa-lg"></i>
+          External
+        </span>
+        <span class="p-2">
+          <i class="fa-solid fa-layer-group fa-lg"></i>
+          TgWeb
+        </span>
+        <span class="p-2">
+          <i class="fa-brands fa-telegram fa-xl"></i>
+          TgApp
+        </span>
+      </p>
+
+      <!-- special buttons -->
+      <div class="panel-block px-2 py-1" style="cursor:default">
+        <button v-if="Profile.list.length > 0" class="button is-small mr-2" @click="Profile.login">
+          <span class="panel-icon p-0 mr-2">
+            <i class="fa-brands fa-telegram fa-xl"></i>
+          </span>
+          <span>Telegram</span>
+        </button>
+        <div class="field has-addons">
+          <p class="control">
+            <button class="button is-small is-primary is-outlined is-flex is-justify-content-center mx-auto" @click="Game.openAll($event.target)">
+              <span class="panel-icon p-0 mr-2 has-text-primary">
+                <i class="fa-solid fa-gavel fa-lg"></i>
+              </span>
+              <span>OpenAll (selected Profile)</span>
+            </button>
+          </p>
+          <p class="control">
+            <input type="number" class="input is-small is-primary" min="1" :max="Game.limitOpenAllTo" v-model="Game.limitOpenAllFrom">
+          </p>
+          <p class="control">
+            <input type="number" class="input is-small is-primary" min="1" :max="Game.filteredGames.length" v-model="Game.limitOpenAllTo">
+          </p>
+        </div>
+      </div>
+
       <!-- GAME LIST  -->
       <div class="vscroll-container">
-        <div v-for="(g, i) in Game.filteredGames" :key="i" class="panel-block px-2 py-1">
-          <div class="counter"><span class="help mr-1" style="width: 2em;">{{ i + 1 }}</span></div>
+        <div v-for="(g, i) in Game.filteredGames" :key="i"
+          :class="{
+            'panel-block px-2 py-1': true,
+            'inSelectedRange': (Game.limitOpenAllFrom <= (i + 1)) && ((i + 1) <= Game.limitOpenAllTo)
+          }">
+          <div class="counter">
+            <span style="width: 2em;" :class="{
+              'help mr-1': true,
+              'tag is-small is-black p-1 m-0 has-text-primary': (Game.limitOpenAllFrom <= (i + 1)) && ((i + 1) <= Game.limitOpenAllTo)
+            }">{{ i + 1 }}</span>
+          </div>
           <div class="iconName mr-2">
             <span class="panel-icon p-0 is-size-3 mr-2">
               <figure class="image" style="height: 36px;width: 36px;">
@@ -230,14 +305,23 @@
               <div>{{ g.name }}</div>
             </div>
           </div>
-          <div class="panelRight" @click="Game.open(g.link, g.gameId)">
-            <button :disabled="g.requireMiniApp || g.requireInApp" class="button" title="Open External">
+          <button :title="'Open ' + g.name + 'with All Profile'" @click="Game.openInAllProfiles(g)"
+            :disabled="g.requireInApp || Game.isLoadingOpen"
+            :class="['button is-ghost has-text-danger', { 'is-loading': Game.lastClickOpen == g }]">
+            <i class="fa-solid fa-gavel fa-lg"></i>
+          </button>
+          <div class="panelRight">
+            <button :title="'Open ' + g.name + 'in new Window'" @click="Game.open(g)"
+              :disabled="g.requireMiniApp || g.requireInApp || Game.isLoadingOpen"
+              :class="['button', { 'is-loading': Game.lastClickOpen == g }]">
               <i class="fa-solid fa-rocket fa-lg"></i>
             </button>
-            <button :disabled="g.requireInApp" class="button" title="Open In TeleWeb">
+            <button :title="'Open ' + g.name + ' in TeleWeb'" @click="Game.open(g)"
+              :disabled="g.requireInApp || Game.isLoadingOpen"
+              :class="['button', { 'is-loading': Game.lastClickOpen == g }]">
               <i class="fa-solid fa-layer-group fa-lg"></i>
             </button>
-            <button class="button" title="Open In TeleApp">
+            <button class="button" :title="'Open ' + g.name + ' in TeleApp'" @click="Game.open(g)">
               <i class="fa-brands fa-telegram fa-xl"></i>
             </button>
           </div>
@@ -254,7 +338,7 @@
     align-items: center;
   }
   .panel-block .iconName .name {
-    width: 7em;
+    width: 8em;
     white-space: nowrap;
   }
   .panel-block .panelRight {
@@ -263,10 +347,12 @@
   }
   .panel-block .panelRight button {
     margin: 0 3px;
-    padding: 12px;
+    padding: 14px 7px;
   }
   .panelRight button.firstAvailable {
-    border: 1px solid green;
+    background-color: transparent;
+    border: 1px solid rgb(0, 209, 178);
+    color: rgb(0, 209, 178);
   }
   .panel-block.selected {
     background-color: var(--bulma-primary-dark);

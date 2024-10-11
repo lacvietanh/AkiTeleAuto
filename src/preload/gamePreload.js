@@ -7,6 +7,7 @@ let gameId = process.argv.filter(arg => arg.startsWith('--akiGameId='))[0]
   .replace('--akiGameId=', '')
 // alert(`${wdType} with gameId:${gameId}`) // debug
 
+
 // --- GLOBAL FUNCTION ---
 window.$id = (id) => document.getElementById(id)
 window.$qs = (s) => document.querySelector(s)
@@ -38,12 +39,15 @@ const api = {
   InspectAtMouse: (x, y) => {
     ipcRenderer.send('action', { name: 'inspect-at', data: { x, y } });
   },
+
   ipcAction: (actionName, data = {}) => {
     ipcRenderer.send('action', { name: actionName, data: data })
   },
+
   ipcGet: (dataName) => {
     ipcRenderer.send('get', dataName)
   },
+
   openIFrameURL: (injectAndroid = true) => {
     let url = document.querySelector('iframe.payment-verification')?.src; // optional chaining
     if (url) {
@@ -54,6 +58,7 @@ const api = {
     }
 
   },
+
   injectAndroid: (opt = true) => {
     let iframe = document.querySelector('iframe.payment-verification') || null
     if (iframe) {
@@ -66,9 +71,11 @@ const api = {
       alert('Please launch a mini app')
     }
   },
+
   randomRange: (min, max) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
+
   autoPointerClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2) {
     const delay = api.randomRange(30, 120);
     api._autoClickInterval = setInterval(() => {
@@ -84,6 +91,8 @@ const api = {
   }
 }
 
+
+// ----- EXPOSE -----
 if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
@@ -97,7 +106,23 @@ if (process.contextIsolated) {
 }
 
 
-(async function checkGameRequiredEnvironment() {
+// ------ IPC Listen ----
+electron.ipcRenderer.on('data', (ev, mess) => {
+  mainLog('ipcRenderer received DATA name:' + mess.name + ' : ' + mess.data);
+  switch (mess.name) {
+    case 'profileDisplayName':
+      $qs('#AkiTele_TitleName').innerText = mess.data; break;
+    default: console.log(mess.name, ' is not defined')
+      break;
+  }
+});
+
+
+
+
+
+// ------------- START -------------
+; (async function checkGameRequiredEnvironment() {
   // Try Lock protoUrl on t.me before DOM load:
   if (window.location.host == "t.me") {
     let game = await ipcRenderer.invoke('get-game-data', gameId);
@@ -196,7 +221,97 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
 })
+// CREATE PANEL:
+window.addEventListener("DOMContentLoaded", () => {
+  const panel = document.createElement('div');
+  panel.className = 'AkiTITLEBAR';
+  panel.innerHTML = /*html*/`
+    <style>
+      .AkiTITLEBAR.active {
+        background-color: #222;
+      }
+      .AkiTITLEBAR {
+        font-family:Inter,SF Pro,Segoe UI,Roboto,Oxygen,Ubuntu,Helvetica Neue,Helvetica,Arial,sans-serif;
+        font-size:0.8em;
+        border-radius:;
+        user-select: none;
+        -webkit-app-region: drag; 
+        position: fixed;
+        left: 0;
+        right:0;
+        top:0;
+        height:20px;
+        z-index: 9999;
+        background-color: #2229;
+        display:flex;
+        justify-content: space-between;
+        color: #fff;
+        text-shadow: 0px 0px 3px #000;
+        backdrop-filter: blur(2px);
+        transition: all 0.2s;
+      }
+      .AkiTITLEBAR button {
+        app-region: none;
+        cursor: pointer;
+        padding: 0 5px;
+        border-radius: 5px;
+        background: #488182;
+        color: #fff;
+        transition: 0.4s;
+      }
+      .AkiTITLEBAR button:hover {
+        box-shadow: 0px 0px 5px 4px rgb(255 255 255 / 49%);
+      }
+      .trafficLight {
+        margin-top: 3px;
+        margin-left: 7px;
+      }
+      .AkiTITLEBAR.active .trafficLight button {
+        opacity: 1;
+      }
+      .trafficLight button {
+        border-radius: 100%;
+        padding: 0;
+        height: 12px;
+        width: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-sizing: border-box;
+        margin-right: 3.5px;
+        background-color: #ddd;
+        position: relative;
+        outline: none;
+        opacity: 0.5;
+      }
+      .trafficLight .close {background-color: #ff6159;}
+      .trafficLight .min {background-color: #ffbd2e;}
+      .trafficLight .max {background-color: #28c941;}
+      .AkiTITLEBAR.active .trafficLight button .close {background-color: #ff5f57;}
+      .AkiTITLEBAR.active .trafficLight button .min {background-color: #febc2e;}
 
+      #AkiTele_TitleName{padding: 1px 3px;}
+      body{
+        margin-top:20px !important;
+      }
+    </style>
+    <div class="trafficLight">
+      <button class="close" title="CLOSE" onclick="api.ipcAction('closethiswindow')">&nbsp;</button>
+      <button class="min"   title="Minimize" onclick="api.ipcAction('minizethiswindow')">&nbsp;</button>
+      <button class="max"   title="Maximize is disabled" disabled>&nbsp;</button>
+    </div>
+    <div id="AkiTele_Tools">
+      <button title="Go Back" onclick="history.go(-1);"><</button>
+      <button title="Go Forward" onclick="history.go(1);">></button>
+    </div>
+    <div id="AkiTele_TitleName"></div>
+  `;
+  document.body.appendChild(panel);
 
-window.addEventListener("load", () => {
-})
+  function setTITLEBAR_active(s = true) {
+    s === true
+      ? $qs('.AkiTITLEBAR')?.classList.add('active')
+      : $qs('.AkiTITLEBAR')?.classList.remove('active')
+  }
+  window.addEventListener('focus', () => setTITLEBAR_active(true));
+  window.addEventListener('blur', () => setTITLEBAR_active(false));
+
+}, { once: true })
