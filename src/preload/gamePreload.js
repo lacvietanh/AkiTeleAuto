@@ -1,5 +1,8 @@
 import { electronAPI } from '@electron-toolkit/preload'
 import { contextBridge, ipcRenderer } from 'electron'
+const fs = require('fs');
+const path = require('path')
+const cheerio = require('cheerio');
 
 let wdType = process.argv.filter(arg => arg.startsWith('--akiWindowType='))[0]
   .replace('--akiWindowType=', '') // loginWindow || gameWindow
@@ -58,6 +61,7 @@ const api = {
     }
 
   },
+
 
   injectAndroid: (opt = true) => {
     let iframe = document.querySelector('iframe.payment-verification') || null
@@ -223,87 +227,12 @@ window.addEventListener("DOMContentLoaded", async () => {
 })
 // CREATE PANEL:
 window.addEventListener("DOMContentLoaded", () => {
+  // file after build (/out/preload/gamePanel.html)
+  const gamePanelHTML = path.join(__dirname, 'gamePanel.html')
   const panel = document.createElement('div');
   panel.className = 'AkiTITLEBAR';
-  panel.innerHTML = /*html*/`
-    <style>
-      .AkiTITLEBAR.active {
-        background-color: #222;
-      }
-      .AkiTITLEBAR {
-        font-family:Inter,SF Pro,Segoe UI,Roboto,Oxygen,Ubuntu,Helvetica Neue,Helvetica,Arial,sans-serif;
-        font-size:0.8em;
-        border-radius:;
-        user-select: none;
-        -webkit-app-region: drag; 
-        position: fixed;
-        left: 0;
-        right:0;
-        top:0;
-        height:20px;
-        z-index: 9999;
-        background-color: #2229;
-        display:flex;
-        justify-content: space-between;
-        color: #fff;
-        text-shadow: 0px 0px 3px #000;
-        backdrop-filter: blur(2px);
-        transition: all 0.2s;
-      }
-      .AkiTITLEBAR button {
-        app-region: none;
-        cursor: pointer;
-        padding: 0 5px;
-        border-radius: 5px;
-        background: #488182;
-        color: #fff;
-        transition: 0.4s;
-      }
-      .AkiTITLEBAR button:hover {
-        box-shadow: 0px 0px 5px 4px rgb(255 255 255 / 49%);
-      }
-      .trafficLight {
-        margin-top: 3px;
-        margin-left: 7px;
-      }
-      .AkiTITLEBAR.active .trafficLight button {
-        opacity: 1;
-      }
-      .trafficLight button {
-        border-radius: 100%;
-        padding: 0;
-        height: 12px;
-        width: 12px;
-        border: 1px solid rgba(0, 0, 0, 0.06);
-        box-sizing: border-box;
-        margin-right: 3.5px;
-        background-color: #ddd;
-        position: relative;
-        outline: none;
-        opacity: 0.5;
-      }
-      .trafficLight .close {background-color: #ff6159;}
-      .trafficLight .min {background-color: #ffbd2e;}
-      .trafficLight .max {background-color: #28c941;}
-      .AkiTITLEBAR.active .trafficLight button .close {background-color: #ff5f57;}
-      .AkiTITLEBAR.active .trafficLight button .min {background-color: #febc2e;}
-
-      #AkiTele_TitleName{padding: 1px 3px;}
-      body{
-        margin-top:20px !important;
-      }
-    </style>
-    <div class="trafficLight">
-      <button class="close" title="CLOSE" onclick="api.ipcAction('closethiswindow')">&nbsp;</button>
-      <button class="min"   title="Minimize" onclick="api.ipcAction('minizethiswindow')">&nbsp;</button>
-      <button class="max"   title="Maximize is disabled" disabled>&nbsp;</button>
-    </div>
-    <div id="AkiTele_Tools">
-      <button title="Go Back" onclick="history.go(-1);"><</button>
-      <button title="Go Forward" onclick="history.go(1);">></button>
-    </div>
-    <div id="AkiTele_TitleName"></div>
-  `;
+  const $ = cheerio.load(fs.readFileSync(gamePanelHTML));
+  panel.innerHTML = $('div.AkiTITLEBAR').html();
   document.body.appendChild(panel);
 
   function setTITLEBAR_active(s = true) {
@@ -313,5 +242,6 @@ window.addEventListener("DOMContentLoaded", () => {
   }
   window.addEventListener('focus', () => setTITLEBAR_active(true));
   window.addEventListener('blur', () => setTITLEBAR_active(false));
+  window.addEventListener('click', () => setTITLEBAR_active(true), { once: true });
 
 }, { once: true })

@@ -1,7 +1,6 @@
 import icon from '../../resources/icon.png?asset'
 const path = require('path');
 const fs = require('fs');
-// const fetch = require('node-fetch'); // Nếu dùng trong main process hoặc Node.js
 const cheerio = require('cheerio');
 const { app, shell, BrowserWindow, dialog, ipcMain } = require('electron');
 const { electronApp, optimizer, is } = require('@electron-toolkit/utils');
@@ -16,6 +15,7 @@ const store = new Store();
 const windowList = new Map(); // { profile: {wid, url} }
 const partitionDir = path.join(app.getPath('userData'), 'Partitions')
 fs.existsSync(partitionDir) || fs.mkdirSync(partitionDir, { recursive: true });
+const devToolsConfig = store.get('devToolsCode', 0) == 1617075783 ? true : false
 
 // ---------------------- Object / Classess ----------------------
 class Profile {
@@ -39,9 +39,10 @@ class Profile {
         preload: path.join(__dirname, '../preload/gamePreload.js')
         , additionalArguments: ['--akiWindowType=' + wdType, '--akiGameId=' + gameId]
         , partition: "persist:profile" + this.id
-        , devTools: app.isPackaged ? false : true
+        , devTools: devToolsConfig || is.dev
         , sandbox: false
         , contextIsolation: false
+        , webSecurity: false,
         // , nodeIntegration: true // Cho phép sử dụng Node.js trong script preload
         // , contextIsolation: false // Tắt context isolation để truy cập trực tiếp object window
 
@@ -153,7 +154,7 @@ function createMainWindow() {
     webPreferences: {
       preload: path.join(__dirname, '../preload/mainPreload.js')
       , sandbox: false
-      , devTools: app.isPackaged ? false : true
+      , devTools: devToolsConfig || is.dev
       // , contextIsolation: false
     }
   })

@@ -80,7 +80,8 @@
 
     updateData: function (gameObj) {
       // under development
-    }
+    },
+
   })
 
   const Profile = reactive({
@@ -146,7 +147,7 @@
 
 <template>
 
-  <section class="is-flex is-justify-content-space-between">
+  <section id="HOME" class="is-flex is-justify-content-space-between">
     <article class="panel m-3 is-dark">
       <p class="panel-heading py-2">
         <i class="fa-brands fa-telegram"></i>
@@ -182,11 +183,11 @@
             </span>
             <div class="is-flex is-justify-content-space-between">
               <div class="name">
-                <div>{{ profile.displayName || 'Name' }}</div>
+                <p>{{ profile.displayName || 'Name' }}</p>
                 <div class="help">{{ profile.name }}</div>
               </div>
               <div class="name">
-                <span>{{ profile.tagName || '@' }}</span>
+                <p>{{ profile.tagName || '@' }}</p>
                 <span class="help">{{ profile.uid || ':' }}</span>
               </div>
             </div>
@@ -207,7 +208,7 @@
           </div>
         </a>
 
-        <a class="panel-block is-justify-content-center buttons">
+        <div class="panel-block is-justify-content-center buttons">
           <button v-if="Profile.currentTab == 'Profile'" class="button is-success" @click="Profile.add" :class="{ 'is-loading': Profile.isLoadingAddNew }">
             <span class="icon">
               <i class="fa-solid fa-plus-circle fa-lg"></i>
@@ -220,7 +221,7 @@
             </span>
             <span class="">DeleteAll</span>
           </button>
-        </a>
+        </div>
 
       </div>
     </article>
@@ -303,7 +304,7 @@
               </figure>
             </span>
             <div class="name is-flex is-justify-content-space-between">
-              <div>{{ g.name }}</div>
+              <p>{{ g.name }}</p>
             </div>
           </div>
           <button :title="'Open ' + g.name + 'with All Profile'" @click="Game.openInAllProfiles(g)"
@@ -340,6 +341,11 @@
   }
   .panel-block .iconName .name {
     width: 8em;
+    margin: auto 5px;
+  }
+  .panel-block .iconName .name p {
+    overflow-x: hidden;
+    text-overflow: ellipsis;
     white-space: nowrap;
   }
   .panel-block .panelRight {

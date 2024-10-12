@@ -37,7 +37,7 @@ let preConfig = [
   },
   { name: "Major", link: "https://t.me/major/start?startapp=1617075783" },
   { name: "BITS", link: "https://t.me/BitsTonboxBot/BitsAirdrops?startapp=L8rLKQ5ZqJVhYE1Vx5jePy" },
-  { name: "CatizenGameCenter", link: "https://t.me/catizenbot/gamecenter?startapp=p_24660687" },
+  { name: "Catizen Game Center", link: "https://t.me/catizenbot/gamecenter?startapp=p_24660687" },
   { name: "Catizen", link: "https://t.me/catizenbot/gameapp?startapp=r_424_25641724" },
   { name: "Bombie", link: "https://t.me/catizenbot/bombie?startapp=g_1002_24660687" },
   { name: "Sunkong", link: "https://t.me/sunkongmyth_bot/sunkong_miniapp?startapp=139FE7A52" },
@@ -106,6 +106,7 @@ let preConfig = [
     // requireMobile: false
     // requireMiniApp: true,
   },
+  {name: "Cherry Game", link: "https://t.me/cherrygame_io_bot"}
 ]
 preConfig.sort((a, b) => a.name.localeCompare(b.name));
 

@@ -2,18 +2,26 @@ import { resolve } from 'path'
 import { defineConfig, externalizeDepsPlugin } from 'electron-vite'
 import vue from '@vitejs/plugin-vue'
 import copy from 'rollup-plugin-copy';
+import InjectCssTo_gamePreloadPanel from './src/injectCss.js'
 
 export default defineConfig({
   main: {
     plugins: [externalizeDepsPlugin()],
   },
   preload: {
-    plugins: [externalizeDepsPlugin()],
+    plugins: [externalizeDepsPlugin(),
+    copy({
+      targets: [
+        { src: 'src/preload/gamePanel.html', dest: 'out/preload' }
+      ], hook: 'writeBundle' // Đảm bảo sao chép sau khi hoàn thành build
+    }),
+    InjectCssTo_gamePreloadPanel({ hook: 'closeBundle' })
+    ],
     build: {
       rollupOptions: {
         input: {
           mainPreload: resolve(__dirname, 'src/preload/mainPreload.js'),
-          gamePreload: resolve(__dirname, 'src/preload/gamePreload.js')
+          gamePreload: resolve(__dirname, 'src/preload/gamePreload.js'),
         },
         output: {
           entryFileNames: '[name].js',
@@ -23,6 +31,7 @@ export default defineConfig({
     }
   },
   renderer: {
+    publicDir: resolve(__dirname, 'src/renderer/src/public'), // Chỉ định thư mục public
     resolve: {
       alias: {
         '@renderer': resolve('src/renderer/src')
@@ -30,16 +39,12 @@ export default defineConfig({
     },
     plugins: [
       vue(),
-      copy({
-        targets: [{ src: 'src/renderer/assets/**/*', dest: 'dist/renderer/assets' }],
-      }),
     ]
     , build: {
       rollupOptions: {
         input: {
           main: resolve(__dirname, 'src/renderer/index.html'),
-          game: resolve(__dirname, 'src/renderer/game.html')
-        }
+        },
       }
     }
   }

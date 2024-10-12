@@ -1,0 +1,222 @@
+<head>
+  <!-- phần này sẽ không import vào preload, chỉ khai báo để preview (dev) -->
+  <link name="Aki_Bulma" rel="stylesheet" href="/out/renderer/css/bulma.min.css">
+  <link name="Aki_FA611" rel="stylesheet" href="/out/renderer/css/FA-611-Free.min.css">
+  <script>
+    window.$id = (id) => document.getElementById(id)
+    window.$qs = (s) => document.querySelector(s)
+    window.$qsa = (s) => document.querySelectorAll(s)
+  </script>
+</head>
+
+<body>
+  <div class="AkiTITLEBAR">
+    <style>
+      #AkiTele_TitleName {
+        padding: 1px 3px;
+      }
+
+      body {
+        margin-top: 20px !important;
+      }
+
+      /* replace bulma  */
+      *,
+      :after,
+      :before {
+        box-sizing: border-box;
+      }
+
+      .AkiTITLEBAR.active {
+        background-color: #222;
+      }
+
+      .AkiTITLEBAR {
+        font-family: Inter, SF Pro, Segoe UI, Roboto, Oxygen, Ubuntu, Helvetica Neue, Helvetica, Arial, sans-serif;
+        font-size: 0.8em;
+        border-radius: 8px 8px 0 0;
+        user-select: none;
+        -webkit-app-region: drag;
+        position: fixed;
+        left: 0;
+        right: 0;
+        top: 0;
+        height: 20px;
+        z-index: 9999;
+        background-color: #2229;
+        display: flex;
+        justify-content: space-between;
+        color: #fff;
+        text-shadow: 0px 0px 3px #000;
+        backdrop-filter: blur(2px);
+        transition: all 0.2s;
+      }
+
+      .AkiTITLEBAR button {
+        app-region: none;
+        cursor: pointer;
+        transition: 0.4s;
+      }
+
+      .AkiTITLEBAR .trafficLight button:hover {
+        box-shadow: 0px 0px 5px 4px rgb(255 255 255 / 49%);
+      }
+
+      .trafficLight {
+        margin-top: 3px;
+        margin-left: 7px;
+      }
+
+      .AkiTITLEBAR.active .trafficLight button {
+        opacity: 1;
+      }
+
+      .trafficLight button {
+        border-radius: 100%;
+        padding: 0;
+        height: 12px;
+        width: 12px;
+        border: 1px solid rgba(0, 0, 0, 0.06);
+        box-sizing: border-box;
+        margin-right: 3.5px;
+        background-color: #ddd;
+        position: relative;
+        outline: none;
+        opacity: 0.5;
+        line-height: normal;
+      }
+
+      .trafficLight .close {
+        background-color: #ff6159;
+      }
+
+      .trafficLight .min {
+        background-color: #ffbd2e;
+      }
+
+      .trafficLight .max {
+        background-color: #28c941;
+      }
+
+      .AkiTITLEBAR.active .trafficLight button .close {
+        background-color: #ff5f57;
+      }
+
+      .AkiTITLEBAR.active .trafficLight button .min {
+        background-color: #febc2e;
+      }
+
+      #AkiGameTools::after {
+        content: '»';
+        font-size: 2em;
+        position: absolute;
+        top: 60%;
+        left: 69%;
+        transform: translate(-50%, -50%) rotate(45deg);
+      }
+
+      button#AkiGameTools {
+        z-index: 10000;
+        top: -22px;
+        position: relative;
+        transform: rotate(45deg);
+        background-color: red;
+        width: 35px;
+        height: 35px;
+        animation: Aki_Tools_flash 2s infinite;
+        border: none;
+        box-shadow: 2px 2px 5px #ff5c2a;
+      }
+
+      @keyframes Aki_Tools_flash {
+        0% {
+          transform: rotate(45deg) translate(0, 0);
+        }
+
+        50% {
+          transform: rotate(45deg) translate(7px, 7px);
+        }
+
+        100% {
+          transform: rotate(45deg) translate(0, 0);
+        }
+      }
+
+      #AkiGameTools_panel button {
+        padding: 5px 7px;
+      }
+
+      #AkiGameTools_panel {
+        position: fixed;
+        z-index: 0;
+        background-image: linear-gradient(#196168, #133873);
+        top: 29px;
+        left: 10px;
+        right: 10px;
+        height: 500px;
+        overflow-y: auto;
+        padding: 5px;
+        margin-top: -529px;
+        transition: margin-top .5s;
+        border-radius: 5px;
+      }
+
+      .AkiTITLEBAR.expand #AkiGameTools_panel {
+        margin-top: 0px;
+      }
+    </style>
+    <div class="trafficLight">
+      <button class="close" title="CLOSE" onclick="api.ipcAction('closethiswindow')">&nbsp;</button>
+      <button class="min" title="Minimize" onclick="api.ipcAction('minizethiswindow')">&nbsp;</button>
+      <button class="max" title="Back" onclick="history.go(-1);" style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -3px;">&larr;</button>
+    </div>
+    <div id="AkiTele_Tools">
+      <button id="AkiGameTools" onclick="$qs('.AkiTITLEBAR').classList.toggle('expand')"></button>
+      <div id="AkiGameTools_panel">
+        <!-- inject/reload as ..  -->
+        <div class="is-flex is-flex-wrap-wrap is-justify-content-space-between">
+          <div class="field has-addons mr-2">
+            <p class="control">
+              <span class="select is-small is-dark">
+                <select name="" id="">
+                  <option value="">Fake..</option>
+                  <option value="android">android</option>
+                  <option value="macos">macos</option>
+                  <option value="web">web</option>
+                </select>
+              </span>
+            </p>
+            <p class="control">
+              <button class="button is-small" onclick="">OK</button>
+            </p>
+          </div>
+          <!-- Open As -->
+          <div class="field has-addons">
+            <p class="control"><a href="" class="button is-small is-static px-1">reOpen</a></p>
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class="fa-solid fa-rocket"></i></span>
+                <span>External</span>
+              </button>
+            </p>
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class="fa-solid fa-layer-group"></i></span>
+                <span>TG Web</span>
+              </button>
+            </p>
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class="fa-brands fa-telegram fa-lg"></i></span>
+                <span>TG App</span>
+              </button>
+            </p>
+            </span>
+          </div>
+        </div>
+
+      </div>
+    </div>
+    <div id="AkiTele_TitleName">Tao || Game</div>
+  </div>
+</body>

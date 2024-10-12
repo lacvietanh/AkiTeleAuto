@@ -9,7 +9,11 @@
       </a>
       <a class="navbar-item p-2">
         <span><i class="fa-solid fa-house fa-xl"></i></span>
-        <span class="text">Dashboard</span>
+        <span class="text">Home</span>
+      </a>
+      <a class="navbar-item p-2">
+        <span><i class="fa-solid fa-list fa-xl"></i></span>
+        <span class="text">Reminder</span>
       </a>
     </div>
 
