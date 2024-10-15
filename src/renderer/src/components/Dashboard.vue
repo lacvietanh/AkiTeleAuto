@@ -12,6 +12,37 @@
   import AppIcon from '../assets/img/icon.png';
 
   const windowList = new Map()
+  window.windowList = windowList;
+
+  const Profile = reactive({
+    list: [],
+    selected: 'profile1',
+    isLoadingAddNew: false,
+    isLoadingDeleteAll: false,
+    currentTab: 'Profile',
+    add() {
+      api.ipcAction('newProfile');
+      Profile.isLoadingAddNew = true;
+    },
+    load() {
+      api.ipcGet('profiles')
+    },
+    login() {
+      let profileid;
+      if (!Profile.selected) Profile.selected = 'profile1'
+      profileid = parseInt(Profile.selected.replace('profile', ''), 10);
+      api.ipcAction('loginProfile', { id: profileid })
+    },
+    delete(profileName) {
+      api.ipcAction('profileDelete', { nameToDelele: profileName })
+    },
+    deleteAll() {
+      Profile.isLoadingDeleteAll = true
+      api.ipcAction('profileDeleteAll')
+      setTimeout(() => { Profile.isLoadingDeleteAll = false }, 1000);
+    }
+  });
+
 
   const Game = reactive({
     list: [],
@@ -45,10 +76,11 @@
     open: (g, forceMode) => {
       // FORCEMODE IS UNDER DEVELOPMENT
       Game.lastClickOpen = g;
+      Game.isLoadingOpen = true;
       if (!Profile.selected) Profile.selected = 'profile1'
       let profileid = parseInt(Profile.selected.replace('profile', ''), 10);
-      Game.isLoadingOpen = true;
       api.ipcAction('openGame', { profileid: profileid, link: g.link, gameId: g.gameId, forceMode: forceMode })
+      if (forceMode == 'tgapp') setTimeout(() => Game.isLoadingOpen = false, 1000)
     },
 
     openInAllProfiles: function (g) {
@@ -78,39 +110,21 @@
       setTimeout(() => { btnClicked.disabled = false }, listToOpen.length * 3 * 1000)
     },
 
+    isOpened: function (g) {
+      return false
+      // under development
+
+      let profileId = Profile.selected.replace('profile', '')
+      console.log(profileId, g.gameId, windowList.get(1))
+      let { gameId } = windowList.get(profileId) || ''
+      return gameId === g.gameId
+    },
+
     updateData: function (gameObj) {
       // under development
     },
 
   })
-
-  const Profile = reactive({
-    list: [],
-    isLoadingAddNew: false,
-    isLoadingDeleteAll: false,
-    currentTab: 'Profile',
-    add() {
-      api.ipcAction('newProfile');
-      Profile.isLoadingAddNew = true;
-    },
-    load() {
-      api.ipcGet('profiles')
-    },
-    login() {
-      let profileid;
-      if (!Profile.selected) Profile.selected = 'profile1'
-      profileid = parseInt(Profile.selected.replace('profile', ''), 10);
-      api.ipcAction('loginProfile', { id: profileid })
-    },
-    delete(profileName) {
-      api.ipcAction('profileDelete', { nameToDelele: profileName })
-    },
-    deleteAll() {
-      Profile.isLoadingDeleteAll = true
-      api.ipcAction('profileDeleteAll')
-      setTimeout(() => { Profile.isLoadingDeleteAll = false }, 1000);
-    }
-  });
 
 
   onMounted(() => {
@@ -119,7 +133,7 @@
   })
 
   electron.ipcRenderer.on('data', (ev, mess) => {
-    console.log(`ipc received "${mess.name}"" data:`, mess.data);
+    console.log(`ipc Dashboard received "${mess.name}"" data:`, mess.data);
     switch (mess.name) {
       case "profiles":
         Profile.list = window.Profiles = mess.data;
@@ -136,13 +150,12 @@
           windowList.set(key, value);
         });
         Game.highLightFirstAvailable()
-        Game.isLoadingOpen = false
-        Game.lastClickOpen = {}
         break;
       default: console.log('ipcRender received "data" but', mess.name, 'not defined yet!');
         break;
     }
   })
+  electron.ipcRenderer.on('gameWindowLoaded', () => { Game.isLoadingOpen = false; Game.lastClickOpen = {} })
 </script>
 
 <template>
@@ -272,7 +285,7 @@
               <span class="panel-icon p-0 mr-2 has-text-primary">
                 <i class="fa-solid fa-gavel fa-lg"></i>
               </span>
-              <span>OpenAll (selected Profile)</span>
+              <span>OpenAll ({{ Profile.selected }})</span>
             </button>
           </p>
           <p class="control">
@@ -299,7 +312,7 @@
           </div>
           <div class="iconName mr-2">
             <span class="panel-icon p-0 is-size-3 mr-2">
-              <figure class="image" style="height: 36px;width: 36px;">
+              <figure :class="['image', { 'gameIsOpen': Game.isOpened(g) }]" style="height: 36px;width: 36px;">
                 <img class=" is-rounded" :src="g.avt || AppIcon" />
               </figure>
             </span>
@@ -307,26 +320,31 @@
               <p>{{ g.name }}</p>
             </div>
           </div>
+
           <button :title="'Open ' + g.name + 'with All Profile'" @click="Game.openInAllProfiles(g)"
             :disabled="g.requireInApp || Game.isLoadingOpen"
-            :class="['button is-ghost has-text-danger', { 'is-loading': Game.lastClickOpen == g }]">
+            :class="['button is-ghost has-text-danger']">
             <i class="fa-solid fa-gavel fa-lg"></i>
           </button>
-          <div class="panelRight">
-            <button :title="'Open ' + g.name + 'in new Window'" @click="Game.open(g)"
-              :disabled="g.requireMiniApp || g.requireInApp || Game.isLoadingOpen"
-              :class="['button', { 'is-loading': Game.lastClickOpen == g }]">
+
+          <div v-if="Game.isLoadingOpen" class="panelRight">
+            <p v-if="Game.lastClickOpen == g">Loading..</p>
+          </div>
+          <div v-else class="panelRight">
+            <button :title="'Open ' + g.name + 'in new Window'" @click="Game.open(g, 'external')"
+              :disabled="g.requireMiniApp || g.requireInApp"
+              :class="['button']">
               <i class="fa-solid fa-rocket fa-lg"></i>
             </button>
-            <button :title="'Open ' + g.name + ' in TeleWeb'" @click="Game.open(g)"
-              :disabled="g.requireInApp || Game.isLoadingOpen"
-              :class="['button', { 'is-loading': Game.lastClickOpen == g }]">
+            <button :title="'Open ' + g.name + ' in TeleWeb'" @click="Game.open(g, 'tgweb')"
+              :disabled="g.requireInApp"
+              :class="['button']">
               <i class="fa-solid fa-layer-group fa-lg"></i>
             </button>
-            <button class="button" :title="'Open ' + g.name + ' in TeleApp'" @click="Game.open(g)">
-              <i class="fa-brands fa-telegram fa-xl"></i>
-            </button>
           </div>
+          <button class="button py-3 px-1" :title="'Open ' + g.name + ' in TeleApp'" @click="Game.open(g, 'tgapp')">
+            <i class="fa-brands fa-telegram fa-xl"></i>
+          </button>
         </div>
       </div>
 
@@ -335,6 +353,11 @@
 </template>
 
 <style>
+  .gameIsOpen {
+    border: 3px solid #00d1b2;
+    border-radius: 100%;
+    transform: scale(1.1);
+  }
   .panel-block .iconName {
     display: inline-flex;
     align-items: center;
@@ -351,6 +374,7 @@
   .panel-block .panelRight {
     display: flex;
     margin-left: auto;
+    min-width: 5.4em;
   }
   .panel-block .panelRight button {
     margin: 0 3px;

@@ -2,7 +2,7 @@ import icon from '../../resources/icon.png?asset'
 const path = require('path');
 const fs = require('fs');
 const cheerio = require('cheerio');
-const { app, shell, BrowserWindow, dialog, ipcMain } = require('electron');
+const { app, shell, BrowserWindow, dialog, ipcMain, screen } = require('electron');
 const { electronApp, optimizer, is } = require('@electron-toolkit/utils');
 import Store from 'electron-store';
 import Game from './game.js';
@@ -12,7 +12,7 @@ process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
 // ---------------------- var / const / init ----------------------
 let mainWindow = {}
 const store = new Store();
-const windowList = new Map(); // { profile: {wid, url} }
+const windowList = new Map(); // { profile1: {wid, gameId} }
 const partitionDir = path.join(app.getPath('userData'), 'Partitions')
 fs.existsSync(partitionDir) || fs.mkdirSync(partitionDir, { recursive: true });
 const devToolsConfig = store.get('devToolsCode', 0) == 1617075783 ? true : false
@@ -22,7 +22,10 @@ class Profile {
   constructor(id = null, url = 'https://web.telegram.org/k', gameId) {
     if (id) this.id = id
     else this.id = parseInt(store.get('profile_increment') + 1)
+
+    let profileName = 'profile' + this.id
     store.set('profile_increment', this.id)
+
     let wdType = gameId ? 'gameWindow' : 'loginWindow'
 
     this.wd = new BrowserWindow({
@@ -49,12 +52,12 @@ class Profile {
       }
     })
 
-    windowList.set(this.id, { wid: this.wd.id, gameId: gameId })
+    windowList.set(profileName, { wid: this.wd.id, gameId: gameId })
     let textLog = id ? 'open' : 'created new';
     console.log(textLog + ' profile id', this.id, 'BrowserId:', this.wd.id, 'url:', url);
 
     // Keep window title as profile user displayName:
-    let profileName = 'profile' + this.id
+
     let displayName = store.get("profileData", {})[profileName]?.displayName || profileName
     this.wd.setTitle(`${displayName} | ${gameId}`)
     this.wd.webContents.on("page-title-updated", (ev) => { ev.preventDefault() })
@@ -63,20 +66,32 @@ class Profile {
     });
     this.wd.loadURL(url)
 
-    this.wd.webContents.setWindowOpenHandler(({ url }) => {
-      shell.openExternal(url)
-      return { action: 'deny' }; // Ngăn chặn mở app ngoài
-    })
-
-    let gameWindow = BrowserWindow.getAllWindows().length - 2;
-    this.wd.once("ready-to-show", () => {
-      this.wd.setPosition(100 * gameWindow, (this.id - 1) * 200, true)
+    // this.wd.webContents.setWindowOpenHandler(({ url }) => {
+    //   shell.openExternal(url)
+    //   return { action: 'deny' }; // Ngăn chặn mở app ngoài
+    // })
+    this.move()
+    this.wd.on("ready-to-show", () => {
       mainWindow.webContents.send('data', { name: 'windowList', data: windowList })
       if (wdType == 'loginWindow')
         mainWindow.webContents.send('data', { name: 'profiles', data: Profile.list })
     })
 
     return this.wd.id
+  }
+  move() {
+    const primaryDisplay = screen.getPrimaryDisplay();
+    const { width: screenW, height: screenH } = primaryDisplay.workAreaSize;
+    const gameWindowCount = BrowserWindow.getAllWindows().length - 2; // Trừ đi 2 cho các cửa sổ khác
+
+    let nextX = (gameWindowCount % Math.floor(screenW / 400)) * 400; // Tính toán vị trí X
+    let nextY = Math.floor(gameWindowCount / Math.floor(screenW / 400)) * 200; // Tính toán vị trí Y
+
+    if (nextY + 200 > screenH) {
+      nextY = screenH - 200; // Nếu vượt quá, đặt Y ở dưới cùng
+    }
+
+    this.wd.setPosition(nextX, nextY, true);
   }
 
   static get list() {
@@ -213,6 +228,7 @@ app.whenReady().then(() => {
         let { profileid, link, gameId } = mess.data;
         new Profile(profileid, link, gameId); break;
       case 'loadURL': senderWd.loadURL(mess.data.url); break;
+      case 'gameWindowLoaded': mainWindow.webContents.send('gameWindowLoaded'); break;
       case 'inspect-at': ev.sender.inspectElement(mess.data.x, mess.data.y); break;
       case 'closethiswindow': senderWd.close(); break;
       case 'minizethiswindow': senderWd.minimize(); break;

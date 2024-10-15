@@ -3,6 +3,7 @@ import { contextBridge, ipcRenderer } from 'electron'
 const fs = require('fs');
 const path = require('path')
 const cheerio = require('cheerio');
+const _GAME_ = {};
 
 let wdType = process.argv.filter(arg => arg.startsWith('--akiWindowType='))[0]
   .replace('--akiWindowType=', '') // loginWindow || gameWindow
@@ -21,7 +22,7 @@ window.mainLog = function (s, hereLog = 0) {
 }
 window.loadURLbyMain = (url) => api.ipcAction('loadURL', { url: url })
 window.selectEleToDo = function (selector, action = (e) => e.click(),
-  interval = 300, timeout = 5000) {
+  interval = 300, timeout = 30000) {
   let startTime = Date.now();
   let timer = setInterval(() => {
     // mainLog('trying in ' + location.host) //Deb
@@ -61,7 +62,6 @@ const api = {
     }
 
   },
-
 
   injectAndroid: (opt = true) => {
     let iframe = document.querySelector('iframe.payment-verification') || null
@@ -120,8 +120,6 @@ electron.ipcRenderer.on('data', (ev, mess) => {
       break;
   }
 });
-
-
 
 
 
@@ -208,9 +206,15 @@ window.addEventListener("DOMContentLoaded", async () => {
         }
       }, 1000)
     } else if (wdType == 'gameWindow') {
-      selectEleToDo(LaunchBtnInPopup, (b) => { b.click(); mainLog('clicked "Launch"', 1) })
-      selectEleToDo(firstIframeGame, async (e) => {
-        let game = await ipcRenderer.invoke('get-game-data', gameId);
+      let game = await ipcRenderer.invoke('get-game-data', gameId);
+
+      // some bot need click GO btn in bot chat -> click LAUNCH btn in popup
+      if (game.launchBtnInBotChat) {
+        selectEleToDo(game.launchBtnInBotChat, (b) => { b.click(); mainLog('clicked LAUNCH in botchat', 1) })
+      }
+      selectEleToDo(LaunchBtnInPopup, (b) => { b.click(); mainLog('clicked "Launch"', 1.5) })
+      api.ipcAction('gameWindowLoaded')
+      selectEleToDo(firstIframeGame, (e) => {
         if (!game.requireMiniApp) {
           mainLog(game.name + ' requireMiniApp: NONE! ' + game.requireMiniApp, 1);
           api.openIFrameURL(game.requireMobile)
@@ -225,15 +229,32 @@ window.addEventListener("DOMContentLoaded", async () => {
   }
 
 })
-// CREATE PANEL:
+
+
+// file after build: /out/preload/gamePanel.html
+const gamePanelFile = path.join(__dirname, 'gamePanel.html')
+let gamePanelHtml = fs.readFileSync(gamePanelFile)
+const $ = cheerio.load(gamePanelHtml);
 window.addEventListener("DOMContentLoaded", () => {
-  // file after build (/out/preload/gamePanel.html)
-  const gamePanelHTML = path.join(__dirname, 'gamePanel.html')
+
+  // CREATE PANEL:
   const panel = document.createElement('div');
   panel.className = 'AkiTITLEBAR';
-  const $ = cheerio.load(fs.readFileSync(gamePanelHTML));
   panel.innerHTML = $('div.AkiTITLEBAR').html();
   document.body.appendChild(panel);
+
+  const panelStyle = document.createElement('style');
+  panelStyle.innerHTML = $('style[name=AkiPanel]').html();
+  document.body.appendChild(panelStyle);
+
+  const BulmaOptimized = document.createElement('style');
+  BulmaOptimized.innerHTML = $('style[name=BulmaOptimized]').html();
+  document.body.appendChild(BulmaOptimized);
+
+  // add vue3 to gamePanel 
+  let scriptVue3 = document.createElement('script')
+  scriptVue3.src = 'https://unpkg.com/vue@3.2.31/dist/vue.global.js'
+  document.body.appendChild(scriptVue3);
 
   function setTITLEBAR_active(s = true) {
     s === true
@@ -245,3 +266,12 @@ window.addEventListener("DOMContentLoaded", () => {
   window.addEventListener('click', () => setTITLEBAR_active(true), { once: true });
 
 }, { once: true })
+
+// wait vue3 load for run script
+window.addEventListener("load", () => {
+  // add script module to gamePanel
+  let scriptPanel = document.createElement('script')
+  scriptPanel.innerHTML = $('script[type=module]').html();
+  document.body.appendChild(scriptPanel);
+}, { once: true })
+

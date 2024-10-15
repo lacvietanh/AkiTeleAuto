@@ -44,7 +44,11 @@ async function optimizeAndInsertCSS(cssFilePaths, htmlFilePath) {
     // Chèn CSS đã tối ưu vào trong thẻ <style> của HTML
     const updatedHtmlContent = htmlContent.replace(
       '<div class="AkiTITLEBAR">',
-      `<div class="AkiTITLEBAR">\n  <style>\n${optimizedCSS}\n  </style>`
+      `<style name="BulmaOptimized">
+      ${optimizedCSS}
+      </style>
+      <div class="AkiTITLEBAR">
+      `
     );
 
     // Ghi kết quả vào file HTML
