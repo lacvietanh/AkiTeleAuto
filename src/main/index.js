@@ -63,7 +63,7 @@ class Profile {
     this.wd.webContents.on("page-title-updated", (ev) => { ev.preventDefault() })
     this.wd.webContents.on("dom-ready", () => {
       this.wd.webContents.send('data', { name: 'profileDisplayName', data: displayName.slice(0, 10) })
-    });
+    }, { once: true });
     this.wd.loadURL(url)
 
     // this.wd.webContents.setWindowOpenHandler(({ url }) => {
@@ -82,17 +82,51 @@ class Profile {
   move() {
     const primaryDisplay = screen.getPrimaryDisplay();
     const { width: screenW, height: screenH } = primaryDisplay.workAreaSize;
-    const gameWindowCount = BrowserWindow.getAllWindows().length - 2; // Trừ đi 2 cho các cửa sổ khác
+    const bounds = primaryDisplay.bounds;  // Lấy kích thước đầy đủ của màn hình
+    const menuBarHeight = bounds.height - screenH;  // Khoảng cách bị chiếm bởi menu bar hoặc title bar
 
-    let nextX = (gameWindowCount % Math.floor(screenW / 400)) * 400; // Tính toán vị trí X
-    let nextY = Math.floor(gameWindowCount / Math.floor(screenW / 400)) * 200; // Tính toán vị trí Y
+    const windows = BrowserWindow.getAllWindows();
+    const windowWidth = 400;  // Chiều rộng mỗi cửa sổ
+    const windowHeight = 200; // Chiều cao mỗi cửa sổ
+    const maxColumns = Math.floor(screenW / windowWidth);  // Số cột tối đa
 
-    if (nextY + 200 > screenH) {
-      nextY = screenH - 200; // Nếu vượt quá, đặt Y ở dưới cùng
+    let nextX = 0;
+    let nextY = 0;
+    let positionFound = false;
+
+    // Tìm vị trí tiếp theo
+    for (let row = 0; nextY + windowHeight <= screenH; row++) {
+      for (let col = 0; col < maxColumns; col++) {
+        nextX = col * windowWidth;
+        nextY = row * windowHeight + menuBarHeight;  // Cộng thêm chiều cao của menu bar
+
+        // Kiểm tra xem vị trí có bị chiếm không
+        const isPositionOccupied = windows.some(window => {
+          const [x, y] = window.getPosition();
+          return x === nextX && y === nextY;
+        });
+
+        if (!isPositionOccupied) {
+          positionFound = true;
+          break;
+        }
+      }
+
+      if (positionFound) {
+        break;
+      }
     }
 
+    if (nextY + windowHeight > screenH) {
+      nextY = screenH - windowHeight + menuBarHeight;
+    }
+
+    // Đặt vị trí cửa sổ
     this.wd.setPosition(nextX, nextY, true);
   }
+
+
+
 
   static get list() {
     // Return list of folders inside PartitionDir
