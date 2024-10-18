@@ -6,7 +6,7 @@ let preConfig = [
   {
     name: "Moonbix", link: "https://t.me/Binance_Moonbix_bot/start?startapp=ref_1617075783&startApp=ref_1617075783"
     , requireMobile: true
-    , requireInApp: true
+    // , requireInApp: true
   },
   {
     name: "CATS", link: "t.me/catsgang_bot/join?startapp=tYbaLFnf8HNHZ3n_vG38F"
@@ -45,7 +45,8 @@ let preConfig = [
   { name: "SEED", link: "t.me/seed_coin_bot/app?startapp=1617075783" },
   {
     name: "Blum", link: "https://t.me/blum/app?startapp=ref_IDq1XTu1E2",
-    requireInApp: true,
+    // requireInApp: true,
+    requireMiniApp: true,
   },
   {
     name: "Hexn.io", link: "t.me/hexn_bot/app?startapp=11d051aa-2c1d-4c2c-85f1-2b98146957b0"
@@ -72,7 +73,11 @@ let preConfig = [
     , requireMiniApp: true
   },
   { name: "MatchQuest", link: "https://t.me/MatchQuestBot/start?startapp=a4427cb30850105ed404fa8e2b64f3bb" },
-  { name: "Coub", link: "https://t.me/coub/app?startapp=coub__marker_20181360" },
+  , {
+    name: 'MemeFi', link: 'https://t.me/memefi_coin_bot/main?startapp=r_7db5aff3fe',
+    requireMobile: true
+  }
+  , { name: "Coub", link: "https://t.me/coub/app?startapp=coub__marker_20181360" },
   { name: "trust_app", link: "https://t.me/trust_empire_bot/trust_app?startapp=1cc5170a-2f84-4f94-9941-ba01c0f28f81" },
   {
     name: "TimeFarm", link: "https://t.me/TimeFarmCryptoBot?start=ewpWKMx5QA1Vjm3m"
@@ -92,7 +97,7 @@ let preConfig = [
   },
   {
     name: "ZenCoin", link: "https://t.me/theZencoin_bot/zencoin?startapp=r=1617075783",
-
+    requireMobile: false
   },
   { name: "Heart", link: "https://t.me/heart_game_bot/game?startapp=1617075783" },
   { name: "Nordom", link: "https://t.me/nordom_gates_bot/open?startapp=YgcyB0" },
@@ -106,7 +111,6 @@ let preConfig = [
     // requireMobile: false
     // requireMiniApp: true,
   },
-  {name: "Cherry Game", link: "https://t.me/cherrygame_io_bot"}
 ]
 preConfig.sort((a, b) => a.name.localeCompare(b.name));
 
@@ -141,21 +145,37 @@ class Game {
     // console.log(this.botId);
     this.gameId = this.link.match(/https:\/\/t\.me\/([^\/?]+\/[^?]+|[^\/?]+)/)[1];
     // console.log(this.gameId);
+    this.tgAddr = Game.convertTgAddr(this.link)
     return this
   }
 
-
   static list = [];
 
-  static init() {
-    let infoStored = store.get('Games', {})
-    preConfig.forEach(g => {
-      let game = new Game(g)
-      game.avt = infoStored[game.gameId]?.avt || ''
-      Game.list.push(game);
-    });
+  static convertTgAddr(gameLink) {
+    const urlParts = gameLink.replace('https://t.me/', '').split('/');
+    const domain = urlParts[0];  // Domain là phần trước dấu "/"
+    // Kiểm tra xem có appname hay không
+    if (urlParts.length > 1) {
+      // Trường hợp có appname
+      const appnameAndQuery = urlParts[1];  // Phần sau dấu "/" là appname và query
+      const [appname, queryString] = appnameAndQuery.split('?'); // Tách appname và query
+      return `tg://resolve?domain=${domain}&appname=${appname}&${queryString}`;
+    } else {
+      // Trường hợp không có appname, chỉ có query
+      const queryString = domain.split('?')[1];  // Lấy phần query string
+      return `tg://resolve?domain=${domain.split('?')[0]}&${queryString}`;
+    }
   }
 }
+
+
+let infoStored = store.get('Games', {})
+preConfig.forEach(g => {
+  let game = new Game(g)
+  game.avt = infoStored[game.gameId]?.avt || ''
+  Game.list.push(game);
+});
+
 
 export default Game;
 

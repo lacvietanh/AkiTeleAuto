@@ -6,10 +6,9 @@
     ipcRenderer.send('log', s)
     if (hereLog == 1) console.log(s);
   }
-
-  import { onMounted, computed, reactive } from 'vue';
+  import { onMounted, computed, reactive, nextTick } from 'vue';
   import { debounce } from 'lodash';
-  import AppIcon from '../assets/img/icon.png';
+  import AppIcon from '/img/icon.png';
 
   const windowList = new Map()
   window.windowList = windowList;
@@ -47,13 +46,14 @@
   const Game = reactive({
     list: [],
 
-    highLightFirstAvailable: () => {
-      setTimeout(() => {
-        $qsa('.GAME .panelRight button')?.forEach(b => b.classList.remove('firstAvailable'));
-        $qsa('.GAME .panelRight')?.forEach(p => {
-          p.querySelector('button:not([disabled])')?.classList.add('firstAvailable')
-        })
-      }, 100);
+    highLightFirstAvailable: function () {
+      let hl = () => {
+        document.querySelectorAll('.GAME .panelRight button').forEach(b => b.classList.remove('firstAvailable'));
+        document.querySelectorAll('.GAME .panelRight').forEach(p => {
+          p.querySelector('button:not([disabled])')?.classList.add('firstAvailable');
+        });
+      }
+      nextTick(() => { hl(); setTimeout(hl, 2000) })
     }
     , searchTerm: ''
     , filteredGames: computed(() => {
@@ -72,15 +72,13 @@
       Game.highLightFirstAvailable()
     }, 300),
 
-    lastClickOpen: {},
+    lastClickOpen: '',
     open: (g, forceMode) => {
-      // FORCEMODE IS UNDER DEVELOPMENT
-      Game.lastClickOpen = g;
+      Game.lastClickOpen = g.gameId;
       Game.isLoadingOpen = true;
       if (!Profile.selected) Profile.selected = 'profile1'
       let profileid = parseInt(Profile.selected.replace('profile', ''), 10);
       api.ipcAction('openGame', { profileid: profileid, link: g.link, gameId: g.gameId, forceMode: forceMode })
-      if (forceMode == 'tgapp') setTimeout(() => Game.isLoadingOpen = false, 1000)
     },
 
     openInAllProfiles: function (g) {
@@ -123,7 +121,6 @@
     updateData: function (gameObj) {
       // under development
     },
-
   })
 
 
@@ -155,7 +152,7 @@
         break;
     }
   })
-  electron.ipcRenderer.on('gameWindowLoaded', () => { Game.isLoadingOpen = false; Game.lastClickOpen = {} })
+  electron.ipcRenderer.on('gameWindowLoaded', () => { Game.isLoadingOpen = false; Game.lastClickOpen = '' })
 </script>
 
 <template>
@@ -312,8 +309,9 @@
           </div>
           <div class="iconName mr-2">
             <span class="panel-icon p-0 is-size-3 mr-2">
-              <figure :class="['image', { 'gameIsOpen': Game.isOpened(g) }]" style="height: 36px;width: 36px;">
-                <img class=" is-rounded" :src="g.avt || AppIcon" />
+              <figure :class="['image', { 'gameIsOpen': Game.isOpened(g) }]" style="height: 34px;width: 34px;">
+                <div v-if="Game.lastClickOpen == g.gameId && Game.isLoadingOpen" class="loader"></div>
+                <img :class="['is-rounded', { 'relativeLoading': Game.lastClickOpen == g.gameId && Game.isLoadingOpen }]" :src="g.avt" @error="() => { g.avt = AppIcon }" />
               </figure>
             </span>
             <div class="name is-flex is-justify-content-space-between">
@@ -321,30 +319,32 @@
             </div>
           </div>
 
-          <button :title="'Open ' + g.name + 'with All Profile'" @click="Game.openInAllProfiles(g)"
+          <button :title="'Open ' + g.name + 'with All Profile'"
+            @click="Game.openInAllProfiles(g)"
             :disabled="g.requireInApp || Game.isLoadingOpen"
             :class="['button is-ghost has-text-danger']">
             <i class="fa-solid fa-gavel fa-lg"></i>
           </button>
 
-          <div v-if="Game.isLoadingOpen" class="panelRight">
-            <p v-if="Game.lastClickOpen == g">Loading..</p>
-          </div>
-          <div v-else class="panelRight">
-            <button :title="'Open ' + g.name + 'in new Window'" @click="Game.open(g, 'external')"
-              :disabled="g.requireMiniApp || g.requireInApp"
+          <div class="panelRight">
+            <button :title="'Open ' + g.name + 'in new Window'"
+              @click="Game.open(g, 'external')"
+              :disabled="g.requireMiniApp || g.requireInApp || Game.isLoadingOpen"
               :class="['button']">
               <i class="fa-solid fa-rocket fa-lg"></i>
             </button>
-            <button :title="'Open ' + g.name + ' in TeleWeb'" @click="Game.open(g, 'tgweb')"
-              :disabled="g.requireInApp"
+            <button :title="'Open ' + g.name + ' in TeleWeb'"
+              @click="Game.open(g, 'tgweb')"
+              :disabled="g.requireInApp || Game.isLoadingOpen"
               :class="['button']">
               <i class="fa-solid fa-layer-group fa-lg"></i>
             </button>
+            <button class="button py-3 px-1" :title="'Open ' + g.name + ' in TeleApp'"
+              @click="Game.open(g, 'tgapp')"
+              :disabled="Game.isLoadingOpen">
+              <i class="fa-brands fa-telegram fa-xl"></i>
+            </button>
           </div>
-          <button class="button py-3 px-1" :title="'Open ' + g.name + ' in TeleApp'" @click="Game.open(g, 'tgapp')">
-            <i class="fa-brands fa-telegram fa-xl"></i>
-          </button>
         </div>
       </div>
 
@@ -357,6 +357,13 @@
     border: 3px solid #00d1b2;
     border-radius: 100%;
     transform: scale(1.1);
+  }
+  img.relativeLoading {
+    position: relative;
+    top: -33px;
+    left: -1px;
+    z-index: -1;
+    transform: scale(0.8);
   }
   .panel-block .iconName {
     display: inline-flex;

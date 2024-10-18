@@ -237,10 +237,12 @@
             </p>
             <p class="control">
               <span class="select is-small">
-                <select name="fakePlatform" class="has-text-warning">
+                <select class="has-text-warning" v-model="Platform" @change="updatePlatform">
                   <option value="">Fake..</option>
                   <option value="android">android</option>
+                  <option value="ios">ios</option>
                   <option value="macos">macos</option>
+                  <option value="desktop">desktop</option>
                   <option value="web">web</option>
                 </select>
               </span>
@@ -288,50 +290,50 @@
         </div>
 
         <!-- Auto -->
-          <div class="is-flex is-flex-wrap-wrap">
+        <div class="is-flex is-flex-wrap-wrap">
 
-            <div class="field has-addons mx-1">
-              <p class="control">
-                <button class="button is-small pl-1">
-                  <span class="mr-1"><i class=""></i></span>
-                  <span>Farm & Claim</span>
-                </button>
-              </p>
-              <p class="control"><a class="button is-small is-static px-1">After</a></p>
-              <p class="control">
-                <input class="input is-small has-background-grey" type="time">
-              </p>
-              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
-            </div>
-
-            <div class="field has-addons mx-1">
-              <p class="control">
-                <button class="button is-small pl-1">
-                  <span class="mr-1"><i class=""></i></span>
-                  <span>Tap & Boost</span>
-                </button>
-              </p>
-              <p class="control"><a class="button is-small is-static px-1">After</a></p>
-              <p class="control">
-                <input class="input is-small has-background-grey" type="time">
-              </p>
-              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
-            </div>
-
-            <div class="field has-addons mx-1">
-              <p class="control">
-                <button class="button is-small pl-1">
-                  <span class="mr-1"><i class=""></i></span>
-                  <span>Run Spiner</span>
-                </button>
-              </p>
-              <p class="control"><a class="button is-small is-static px-1">After</a></p>
-              <p class="control">
-                <input class="input is-small has-background-grey" type="time">
-              </p>
-              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
-            </div>
+          <div class="field has-addons mx-1">
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class=""></i></span>
+                <span>Farm & Claim</span>
+              </button>
+            </p>
+            <p class="control"><a class="button is-small is-static px-1">After</a></p>
+            <p class="control">
+              <input class="input is-small has-background-grey" type="time">
+            </p>
+            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
           </div>
+
+          <div class="field has-addons mx-1">
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class=""></i></span>
+                <span>Tap & Boost</span>
+              </button>
+            </p>
+            <p class="control"><a class="button is-small is-static px-1">After</a></p>
+            <p class="control">
+              <input class="input is-small has-background-grey" type="time">
+            </p>
+            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+          </div>
+
+          <div class="field has-addons mx-1">
+            <p class="control">
+              <button class="button is-small pl-1">
+                <span class="mr-1"><i class=""></i></span>
+                <span>Run Spiner</span>
+              </button>
+            </p>
+            <p class="control"><a class="button is-small is-static px-1">After</a></p>
+            <p class="control">
+              <input class="input is-small has-background-grey" type="time">
+            </p>
+            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -345,9 +347,30 @@
     const App = {
       data() {
         return {
-          title: 'Hello!'
+          title: 'Hello!',
+          Platform: ''
         };
-      }
+      },
+      mounted() {
+        // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
+        const match = location.href.match(/tgWebAppPlatform=(.*?)&/);
+        this.Platform = match ? match[1] : '';
+      },
+
+      methods: {
+        updatePlatform() {
+          // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
+          let url = location.href
+          if (url.includes('tgWebAppPlatform')) {
+            url = url.replace(/(tgWebAppPlatform=)[^&]*/, `$1${this.Platform}`);
+            location.href = url
+            location.reload()
+          } else {
+            alert('No tgWebAppPlatform detect in url')
+            this.Platform = ''
+          }
+        }
+      },
     };
 
     window.Aki_Panel = createApp(App).mount('.AkiTITLEBAR');

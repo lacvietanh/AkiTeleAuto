@@ -2,7 +2,7 @@ import icon from '../../resources/icon.png?asset'
 const path = require('path');
 const fs = require('fs');
 const cheerio = require('cheerio');
-const { app, shell, BrowserWindow, dialog, ipcMain, screen } = require('electron');
+const { app, shell, BrowserWindow, session, dialog, ipcMain, screen } = require('electron');
 const { electronApp, optimizer, is } = require('@electron-toolkit/utils');
 import Store from 'electron-store';
 import Game from './game.js';
@@ -15,11 +15,17 @@ const store = new Store();
 const windowList = new Map(); // { profile1: {wid, gameId} }
 const partitionDir = path.join(app.getPath('userData'), 'Partitions')
 fs.existsSync(partitionDir) || fs.mkdirSync(partitionDir, { recursive: true });
+
 const devToolsConfig = store.get('devToolsCode', 0) == 1617075783 ? true : false
+
+if (store.get('profile_increment') === undefined) {
+  console.log('init first time lauch app. set Profile Increment to 0');
+  store.set('profile_increment', 0)
+}
 
 // ---------------------- Object / Classess ----------------------
 class Profile {
-  constructor(id = null, url = 'https://web.telegram.org/k', gameId) {
+  constructor(id = null, url = 'https://web.telegram.org/k', gameId, forceMode) {
     if (id) this.id = id
     else this.id = parseInt(store.get('profile_increment') + 1)
 
@@ -28,10 +34,21 @@ class Profile {
 
     let wdType = gameId ? 'gameWindow' : 'loginWindow'
 
+    // Bypass CSP:
+    const thisSession = session.fromPartition('persist:profile' + this.id);
+    thisSession.webRequest.onHeadersReceived((details, callback) => {
+      let headers = details.responseHeaders;
+      // Xóa CSP header và X-Frame-Options
+      delete headers['content-security-policy'];
+      delete headers['x-frame-options'];
+      headers['Access-Control-Allow-Origin'] = ['*'];
+      callback({ cancel: false, responseHeaders: headers });
+    });
+
     this.wd = new BrowserWindow({
       width: 400, height: 680,
       minHeight: 250, minWidth: 200,
-      maxHeight: 900, maxWidth: 600,
+      maxHeight: 1080, maxWidth: 600,
       show: true,
       transparent: true,
       frame: false,
@@ -40,12 +57,18 @@ class Profile {
       ...(process.platform === 'linux' ? { icon } : {})
       , webPreferences: {
         preload: path.join(__dirname, '../preload/gamePreload.js')
-        , additionalArguments: ['--akiWindowType=' + wdType, '--akiGameId=' + gameId]
+        , additionalArguments: [
+          '--akiWindowType=' + wdType,
+          '--akiGameId=' + gameId,
+          '--akiForceMode=' + forceMode
+        ]
         , partition: "persist:profile" + this.id
         , devTools: devToolsConfig || is.dev
         , sandbox: false
         , contextIsolation: false
         , webSecurity: false,
+        userAgent: 'Mozilla/5.0 (Linux; Android 10; Mobile; rv:91.0) Gecko/91.0 Firefox/91.0'
+        // userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 18_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/18.0 Mobile/15A372 Safari/604.1'
         // , nodeIntegration: true // Cho phép sử dụng Node.js trong script preload
         // , contextIsolation: false // Tắt context isolation để truy cập trực tiếp object window
 
@@ -182,12 +205,6 @@ class Profile {
       w.close(); console.log('closed window', w.title, 'id:', w.id);
     }
   }
-  static init() {
-    if (store.get('profile_increment') === undefined) {
-      console.log('init first time lauch app. set Profile Increment to 0');
-      store.set('profile_increment', 0)
-    }
-  }
 }
 
 // ---------------------- function ----------------------
@@ -234,9 +251,6 @@ async function fetchBE(tagname) {
   return { avt, displayName };
 }
 
-
-Game.init()
-Profile.init()
 app.whenReady().then(() => {
   app.commandLine.appendSwitch('disable-site-isolation-trials')
   electronApp.setAppUserModelId('com.aki.teleauto') // need on windows
@@ -259,8 +273,8 @@ app.whenReady().then(() => {
         break;
       case 'profileDeleteAll': Profile.clearAll(); break;
       case 'openGame':
-        let { profileid, link, gameId } = mess.data;
-        new Profile(profileid, link, gameId); break;
+        let { profileid, link, gameId, forceMode } = mess.data;
+        new Profile(profileid, link, gameId, forceMode); break;
       case 'loadURL': senderWd.loadURL(mess.data.url); break;
       case 'gameWindowLoaded': mainWindow.webContents.send('gameWindowLoaded'); break;
       case 'inspect-at': ev.sender.inspectElement(mess.data.x, mess.data.y); break;
