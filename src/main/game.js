@@ -6,7 +6,6 @@ let preConfig = [
   {
     name: "Moonbix", link: "https://t.me/Binance_Moonbix_bot/start?startapp=ref_1617075783&startApp=ref_1617075783"
     , requireMobile: true
-    // , requireInApp: true
   },
   {
     name: "CATS", link: "t.me/catsgang_bot/join?startapp=tYbaLFnf8HNHZ3n_vG38F"
@@ -82,6 +81,7 @@ let preConfig = [
   {
     name: "TimeFarm", link: "https://t.me/TimeFarmCryptoBot?start=ewpWKMx5QA1Vjm3m"
     , launchBtnInBotChat: '.is-web-view.reply-markup-button.rp'
+    , requireMiniApp: true
   },
   {
     name: "Fintopio", link: "https://t.me/fintopio/wallet?startapp=reflink-reflink_h5vWbSndCMoyEBSG-"
@@ -108,8 +108,8 @@ let preConfig = [
   {
     name: "ZESH", link: "https://t.me/ZeshToTheMoonBot?start=PY8PHZHi7Vtz",
     launchBtnInBotChat: '.new-message-bot-commands.is-view'
+    , requireMiniApp: true
     // requireMobile: false
-    // requireMiniApp: true,
   },
 ]
 preConfig.sort((a, b) => a.name.localeCompare(b.name));

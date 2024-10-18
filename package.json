@@ -1,7 +1,7 @@
 {
   "name": "aki.teleauto",
   "productName": "AkiTeleAuto",
-  "version": "2024.10.12",
+  "version": "2024.10.18",
   "description": "AkiAuto Telegram MiniApp Multiple Accounts Manager",
   "main": "./out/main/index.js",
   "author": "LacVietAnh",
@@ -13,9 +13,10 @@
     "dev": "electron-vite dev",
     "build": "electron-vite build",
     "postinstall": "electron-builder install-app-deps",
-    "build:unpack": "npm run build && electron-builder --dir",
+    "build:all": "./buildAll.sh",
+    "build:unpack": "npm run build && electron-builder --mac --dir",
     "build:win": "npm run build && electron-builder --win",
-    "build:mac": "npm run build && electron-builder -m --dir && open -R dist/mac-arm64/AkiTeleAuto.app",
+    "build:mac": "npm run build && electron-builder -m && open -R dist/mac-arm64/AkiTeleAuto.app",
     "build:linux": "npm run build && electron-builder --linux"
   },
   "dependencies": {
