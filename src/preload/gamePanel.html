@@ -215,10 +215,10 @@
         <!-- inject/reload as ..  -->
         <div class="is-block">
           <!-- Open As -->
+          Open As...
           <div class="field has-addons">
-            <p class="control"><a class="button is-small is-static px-1">reOpen</a></p>
             <p class="control">
-              <button class="button is-small pl-1">
+              <button class="button is-small pl-1" :disabled="currentOpen=='external'" onclick="api.openIFrameURL()">
                 <span class="mr-1"><i class="fa-solid fa-rocket"></i></span>
                 <span>External</span>
               </button>
@@ -238,7 +238,7 @@
             <p class="control">
               <span class="select is-small">
                 <select class="has-text-warning" v-model="Platform" @change="updatePlatform">
-                  <option value="">Fake..</option>
+                  <option value="">Platform..</option>
                   <option value="android">android</option>
                   <option value="ios">ios</option>
                   <option value="macos">macos</option>
@@ -250,9 +250,30 @@
           </div>
         </div>
 
+
+        <!-- AutoClick -->
+        <div class="my-3 mt-4">
+          AutoClick: (under development)
+          <div class="field has-addons">
+            <p class="control mx-5">
+              <label class="">
+                <input type="checkbox" v-model="autoclickRandom" />
+                Random
+              </label>
+            </p>
+            <p :class="['control mr-2',{'has-text-grey-lighter':autoclickRandom}]">Constant:</p>
+            <p class="control pt-1">
+              <input type="range" min="30" max="1000" name="autoclickms" v-model="autoclickms" :disabled="autoclickRandom">
+            </p>
+            <p class="control mx-2">
+              <span :class="['help',{'has-text-grey-lighter':autoclickRandom}]">{{ autoclickms }}ms</span>
+            </p>
+          </div>
+        </div>
+
         <!-- Reminder -->
-        <div class="">
-          Reminder
+        <div class="my-3">
+          Reminder: (under development)
           <div class="field has-addons">
             <p class="control"><a class="button is-small is-static">After</a></p>
             <p class="control">
@@ -270,8 +291,8 @@
         </div>
 
         <!-- Timer -->
-        <div class="field">
-          Timer
+        <div class="my-3">
+          Timer: (under development)
           <div class="field has-addons">
             <p class="control">
               <span class="select is-small">
@@ -290,48 +311,50 @@
         </div>
 
         <!-- Auto -->
-        <div class="is-flex is-flex-wrap-wrap">
+        <div class="my-3">
+          Auto: (under development)
+          <div class="is-flex is-flex-wrap-wrap">
+            <div class="field has-addons mx-1">
+              <p class="control">
+                <button class="button is-small pl-1">
+                  <span class="mr-1"><i class=""></i></span>
+                  <span>Farm & Claim</span>
+                </button>
+              </p>
+              <p class="control"><a class="button is-small is-static px-1">After</a></p>
+              <p class="control">
+                <input class="input is-small has-background-grey" type="time">
+              </p>
+              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+            </div>
 
-          <div class="field has-addons mx-1">
-            <p class="control">
-              <button class="button is-small pl-1">
-                <span class="mr-1"><i class=""></i></span>
-                <span>Farm & Claim</span>
-              </button>
-            </p>
-            <p class="control"><a class="button is-small is-static px-1">After</a></p>
-            <p class="control">
-              <input class="input is-small has-background-grey" type="time">
-            </p>
-            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
-          </div>
+            <div class="field has-addons mx-1">
+              <p class="control">
+                <button class="button is-small pl-1">
+                  <span class="mr-1"><i class=""></i></span>
+                  <span>Tap & Boost</span>
+                </button>
+              </p>
+              <p class="control"><a class="button is-small is-static px-1">After</a></p>
+              <p class="control">
+                <input class="input is-small has-background-grey" type="time">
+              </p>
+              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+            </div>
 
-          <div class="field has-addons mx-1">
-            <p class="control">
-              <button class="button is-small pl-1">
-                <span class="mr-1"><i class=""></i></span>
-                <span>Tap & Boost</span>
-              </button>
-            </p>
-            <p class="control"><a class="button is-small is-static px-1">After</a></p>
-            <p class="control">
-              <input class="input is-small has-background-grey" type="time">
-            </p>
-            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
-          </div>
-
-          <div class="field has-addons mx-1">
-            <p class="control">
-              <button class="button is-small pl-1">
-                <span class="mr-1"><i class=""></i></span>
-                <span>Run Spiner</span>
-              </button>
-            </p>
-            <p class="control"><a class="button is-small is-static px-1">After</a></p>
-            <p class="control">
-              <input class="input is-small has-background-grey" type="time">
-            </p>
-            <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+            <div class="field has-addons mx-1">
+              <p class="control">
+                <button class="button is-small pl-1">
+                  <span class="mr-1"><i class=""></i></span>
+                  <span>Run Spiner</span>
+                </button>
+              </p>
+              <p class="control"><a class="button is-small is-static px-1">After</a></p>
+              <p class="control">
+                <input class="input is-small has-background-grey" type="time">
+              </p>
+              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+            </div>
           </div>
         </div>
 
@@ -347,11 +370,14 @@
     const App = {
       data() {
         return {
-          title: 'Hello!',
-          Platform: ''
+          currentOpen: '' // iframe | external
+          , Platform: ''
+          , autoclickms: 50
+          , autoclickRandom: true
         };
       },
       mounted() {
+        this.currentOpen = location.host == 'web.telegram.org' ? 'iframe' : 'external'
         // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
         const match = location.href.match(/tgWebAppPlatform=(.*?)&/);
         this.Platform = match ? match[1] : '';
@@ -373,7 +399,7 @@
       },
     };
 
-    window.Aki_Panel = createApp(App).mount('.AkiTITLEBAR');
+    window.AkiPanel = createApp(App).mount('.AkiTITLEBAR');
   </script>
 </body>
 

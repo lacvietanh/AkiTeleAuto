@@ -2,6 +2,8 @@
 </script>
 <template>
   <nav class="mainNav">
+
+    <!-- TOP  -->
     <div class="lnav-top">
       <a class="navbar-item p-2">
         <span><i class="fa-solid fa-burst fa-xl"></i></span>
@@ -17,7 +19,13 @@
       </a>
     </div>
 
+
+    <!-- BOTTOM  -->
     <div class="lnav-bot">
+      <a class="navbar-item p-2">
+        <span><i class="fa-solid fa-gear fa-xl"></i></span>
+        <span class="text">Settings</span>
+      </a>
       <a class="navbar-item p-2">
         <span><i class="fa-solid fa-info-circle fa-xl"></i></span>
         <span class="text">Info</span>
@@ -59,6 +67,5 @@
   }
   .mainNav:hover span.text {
     width: 100px;
-
   }
 </style>
