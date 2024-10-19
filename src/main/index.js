@@ -37,12 +37,26 @@ class Profile {
     // Bypass CSP:
     const thisSession = session.fromPartition('persist:profile' + this.id);
     thisSession.webRequest.onHeadersReceived((details, callback) => {
-      let headers = details.responseHeaders;
+      const { responseHeaders, requestHeaders } = details;
+
       // Xóa CSP header và X-Frame-Options
-      delete headers['content-security-policy'];
-      delete headers['x-frame-options'];
-      headers['Access-Control-Allow-Origin'] = ['*'];
-      callback({ cancel: false, responseHeaders: headers });
+      delete responseHeaders['content-security-policy'];
+      delete responseHeaders['x-frame-options'];
+
+      // Lấy Origin từ request headers
+      let origin = requestHeaders && (requestHeaders['Origin'] || requestHeaders['Referer']);
+
+      if (!origin) {
+        callback({ responseHeaders }); return;
+      }
+      // Xóa tất cả các phiên bản của header Access-Control-Allow-Origin
+      const originHeaderKeys = Object.keys(responseHeaders).filter(key => key.toLowerCase() === 'access-control-allow-origin');
+      originHeaderKeys.forEach(key => { delete responseHeaders[key]; });
+      responseHeaders['Access-Control-Allow-Origin'] = [origin];
+
+      responseHeaders['Access-Control-Allow-Credentials'] = ['true'];
+
+      callback({ cancel: false, responseHeaders: responseHeaders });
     });
 
     this.wd = new BrowserWindow({
