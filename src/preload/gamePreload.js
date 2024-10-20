@@ -82,7 +82,7 @@ const api = {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
-  autoPointerClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2) {
+  autoClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2) {
     const delay = api.randomRange(30, 120);
     api._autoClickInterval = setInterval(() => {
       const target = document.elementFromPoint(x, y);
@@ -90,21 +90,18 @@ const api = {
       const xRandom = api.randomRange(x - range, x + range)
       const yRandom = api.randomRange(y - range, y + range)
       // Mouse Event: 
-      const mouseDown = new MouseEvent('mousedown', { bubbles: true, clientX: xRandom, clientY: yRandom });
-      const mouseUp = new MouseEvent('mouseup', { bubbles: true, clientX: xRandom, clientY: yRandom });
-      target.dispatchEvent(mouseDown);
-      target.dispatchEvent(mouseUp);
+      target.dispatchEvent(new MouseEvent('mousedown', { bubbles: true, clientX: xRandom, clientY: yRandom }));
+      target.dispatchEvent(new MouseEvent('mouseup', { bubbles: true, clientX: xRandom, clientY: yRandom }));
       // TouchEvent: touchstart and touchend
       const touchObj = new Touch({ identifier: Date.now(), target: target, clientX: xRandom, clientY: yRandom });
-      const touchStart = new TouchEvent('touchstart', { bubbles: true, touches: [touchObj] });
-      const touchEnd = new TouchEvent('touchend', { bubbles: true, changedTouches: [touchObj] });
-      target.dispatchEvent(touchStart);
-      target.dispatchEvent(touchEnd);
-      // PointerEvent: pointerdown and pointerup
-      const pointerDown = new PointerEvent('pointerdown', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' });
-      const pointerUp = new PointerEvent('pointerup', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' });
-      target.dispatchEvent(pointerDown);
-      target.dispatchEvent(pointerUp);
+      target.dispatchEvent(new TouchEvent('touchstart', { bubbles: true, touches: [touchObj] }));
+      target.dispatchEvent(new TouchEvent('touchend', { bubbles: true, changedTouches: [touchObj] }));
+      // PointerEvent: pointerdown, pointerup, click (ex: Zencoin required 'click')
+      target.dispatchEvent(new PointerEvent('click', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
+      target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' }));
+      target.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' }));
+      // bonus CLICK
+      target.click()
     }, delay);
     return delay
   }
@@ -138,7 +135,7 @@ document.addEventListener('mousedown', function (ev) {
   if (!ev.ctrlKey && !ev.altKey && ev.shiftKey && ev.button === 0) {
     // shift + Lclick = AutoClick
     if (api._autoClickInterval == null) {
-      let delay = api.autoPointerClick(ev.clientX, ev.clientY)
+      let delay = api.autoClick(ev.clientX, ev.clientY)
       let div = document.createElement('div')
       div.id = "aki_autoclickLabel"
       div.innerText = `AUTOCLICK: ${delay}ms`;
@@ -270,7 +267,21 @@ function addAkiGamePanel() {
       let LaunchBtnInPopup = '.popup-button.btn.primary.rp'
       let firstIframeGame = 'iframe.payment-verification'
       // some bot need click GO btn in bot chat -> click LAUNCH btn in popup
-      if (game.launchBtnInBotChat) selectEleToDo(game.launchBtnInBotChat)
+      if (game.launchBtnInBotChat) {
+        const Inteval_ = setInterval(() => {
+          let PlayBtns = $qsa(game.launchBtnInBotChat)
+          // select last play button in bot chat (newest message from bot)
+          if (PlayBtns) {
+            PlayBtns[PlayBtns.length - 1].click()
+            clearInterval(Inteval_)
+            console.log('clicked PlayBtn in botchat & stop wait');
+          }
+        }, 3000);
+        setTimeout(() => {
+          clearInterval(Inteval_)
+          console.log('stop wait to click PlayBtn in botchat');
+        }, 30000)
+      }
       selectEleToDo(LaunchBtnInPopup)
 
       selectEleToDo(firstIframeGame, (e) => {
