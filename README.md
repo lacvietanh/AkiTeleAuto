@@ -3,8 +3,7 @@
 ![image](https://github.com/user-attachments/assets/532cdbdd-f30b-4290-b99f-af49ba59b7d6)
 ![image](https://github.com/user-attachments/assets/705617ea-faea-46bc-b651-510c050cf1f1)
 ![image](https://github.com/user-attachments/assets/dda8a3d4-f2d5-4722-9fa1-3636bec8e78c)
-
-
+![autoclick](https://github.com/user-attachments/assets/f68797f3-da45-4e36-b13d-646a08e741ee)
 
 Tiếng Việt:
 
@@ -43,10 +42,11 @@ Note: The project is under development, some features may be updated and complet
 √ Action button (Open in external window | Open in telegram web as miniapp | Open in Telegram App)
 √ Auto Click On/Off by Shift + Click
 √ Bypass CORS & CSP (Some games prevent open inside telegram web by setting CORS and CSP)
-- Auto farm by game settings
+- Auto farm by invidualy game settings: Tap & boost tap, claim & farming, upgrade mining card,...
 - Add more game manually
-- Rating & Sort Game (in dashboard)
-- Proxy
+- Dashboard: Rating & Sort Game
+- Dashboard: Multi-Select and Batch Action (close all, autoclick all, ...)
+- Profile Manager & Proxy/VPN (each profile has separate IP and social network accounts: facebook, x, telegram, instagram,..)
 - Control and AutoClick work inside iframe (slenium core)
-- Feature: Global setting
-- Feature: ONE Community inside app (for discuss about combo daily, airdrop,..)
+- Global setting (example: max selected account to run, max game open same time
+- ONE Community inside app (for discuss about combo daily, airdrop,..)
