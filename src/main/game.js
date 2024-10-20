@@ -155,7 +155,9 @@ let preConfig = [
   },
   {
     name: "HatchCat", link: "https://t.me/hash_cats_bot?start=rQYJoy1gH1"
+    , launchBtnInBotChat: '.is-web-view.reply-markup-button.rp'
     , requireMobile: false
+    , rating: 4
   },
   {
     name: "Rating", link: "https://t.me/rating/app?startapp=ref_6c19f21617075783"

@@ -9,8 +9,13 @@ import Game from './game.js';
 
 process.env['ELECTRON_DISABLE_SECURITY_WARNINGS'] = true
 
+// const { autoUpdater } = require('electron-updater');
+// autoUpdater.checkForUpdatesAndNotify();
+
 // ---------------------- var / const / init ----------------------
+
 let mainWindow = {}
+
 const store = new Store();
 const windowList = new Map(); // { profile1: {wid, gameId} }
 const partitionDir = path.join(app.getPath('userData'), 'Partitions')
@@ -38,24 +43,24 @@ class Profile {
     const thisSession = session.fromPartition('persist:profile' + this.id);
     thisSession.webRequest.onHeadersReceived((details, callback) => {
       const { responseHeaders, requestHeaders } = details;
-
       // Xóa CSP header và X-Frame-Options
       delete responseHeaders['content-security-policy'];
       delete responseHeaders['x-frame-options'];
 
-      // Lấy Origin từ request headers
-      let origin = requestHeaders && (requestHeaders['Origin'] || requestHeaders['Referer']);
-
-      if (!origin) {
-        callback({ responseHeaders }); return;
-      }
       // Xóa tất cả các phiên bản của header Access-Control-Allow-Origin
-      const originHeaderKeys = Object.keys(responseHeaders).filter(key => key.toLowerCase() === 'access-control-allow-origin');
-      originHeaderKeys.forEach(key => { delete responseHeaders[key]; });
-      responseHeaders['Access-Control-Allow-Origin'] = [origin];
+      // const originHeaderKeys = Object.keys(responseHeaders).filter(key => key.toLowerCase() === 'access-control-allow-origin');
+      // originHeaderKeys.forEach(key => { delete responseHeaders[key]; });
 
-      responseHeaders['Access-Control-Allow-Credentials'] = ['true'];
-
+      // Lấy Origin từ request headers
+      // let origin = requestHeaders && (requestHeaders['Origin'] || requestHeaders['Referer']);
+      // if (origin) {
+      //   responseHeaders['Access-Control-Allow-Origin'] = [origin];
+      //   responseHeaders['Access-Control-Allow-Credentials'] = ['true'];
+      //   responseHeaders['Access-Control-Allow-Headers'] = ['csrftoken', 'Content-Type', 'Authorization'];  // Thêm csrftoken vào đây
+      // } else {
+      //   responseHeaders['Access-Control-Allow-Credentials'] = ['false'];
+      //   // responseHeaders['Access-Control-Allow-Origin'] = ['*'];
+      // }
       callback({ cancel: false, responseHeaders: responseHeaders });
     });
 
