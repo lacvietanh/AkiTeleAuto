@@ -5,8 +5,6 @@
 ![image](https://github.com/user-attachments/assets/dda8a3d4-f2d5-4722-9fa1-3636bec8e78c)
 ![autoclick](https://github.com/user-attachments/assets/f68797f3-da45-4e36-b13d-646a08e741ee)
 
-Tiếng Việt:
-
 Bạn là một game thủ crypto đích thực, đam mê kiếm tiền online qua các tựa game blockchain hấp dẫn? Bạn đang "vật lộn" với việc quản lý hàng tá tài khoản và game khác nhau, tốn hàng giờ mỗi ngày chỉ để "farm" mà vẫn lo sợ bỏ lỡ mất cơ hội? 
 
 Đừng lo, đã có AkiTeleAuto - Giải pháp tối ưu cho game thủ crypto trên Telegram!
@@ -19,11 +17,7 @@ Bạn là một game thủ crypto đích thực, đam mê kiếm tiền online q
 AkiTeleAuto - Nâng tầm trải nghiệm game crypto của bạn! 🚀
 
 Lưu ý: Dự án đang trong quá trình phát triển, một số tính năng có thể được cập nhật và hoàn thiện trong thời gian tới.
-
 ---
-
-English:
-
 Are you a dedicated crypto gamer, passionate about earning online through exciting blockchain games? Are you struggling to manage dozens of accounts and different games, spending hours each day just "farming" while still afraid of missing out on opportunities?
 
 Don't worry, AkiTeleAuto is here - The optimal solution for crypto gamers on Telegram!
@@ -37,16 +31,15 @@ AkiTeleAuto - Level up your crypto gaming experience! 🚀
 
 Note: The project is under development, some features may be updated and completed in the future.
 
-
 # Development TaskList:
-√ Action button (Open in external window | Open in telegram web as miniapp | Open in Telegram App)
-√ Auto Click On/Off by Shift + Click
-√ Bypass CORS & CSP (Some games prevent open inside telegram web by setting CORS and CSP)
+- √ Action button (Open in external window | Open in telegram web as miniapp | Open in Telegram App)
+- √ Auto Click On/Off by Shift + Click
+- √ Bypass CORS & CSP (Some games prevent open inside telegram web by setting CORS and CSP)
 - Auto farm by invidualy game settings: Tap & boost tap, claim & farming, upgrade mining card,...
 - Add more game manually
 - Dashboard: Rating & Sort Game
 - Dashboard: Multi-Select and Batch Action (close all, autoclick all, ...)
 - Profile Manager & Proxy/VPN (each profile has separate IP and social network accounts: facebook, x, telegram, instagram,..)
 - Control and AutoClick work inside iframe (slenium core)
-- Global setting (example: max selected account to run, max game open same time
+- Global setting (example: max selected account to run, max opened game same time..)
 - ONE Community inside app (for discuss about combo daily, airdrop,..)
