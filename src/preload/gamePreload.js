@@ -89,9 +89,22 @@ const api = {
       const range = 50; // random range
       const xRandom = api.randomRange(x - range, x + range)
       const yRandom = api.randomRange(y - range, y + range)
-      target.dispatchEvent(new PointerEvent('pointerdown', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
-      target.dispatchEvent(new PointerEvent('pointerup', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
-      target.dispatchEvent(new PointerEvent('click', { bubbles: true, cancelable: true, clientX: xRandom, clientY: yRandom }));
+      // Mouse Event: 
+      const mouseDown = new MouseEvent('mousedown', { bubbles: true, clientX: xRandom, clientY: yRandom });
+      const mouseUp = new MouseEvent('mouseup', { bubbles: true, clientX: xRandom, clientY: yRandom });
+      target.dispatchEvent(mouseDown);
+      target.dispatchEvent(mouseUp);
+      // TouchEvent: touchstart and touchend
+      const touchObj = new Touch({ identifier: Date.now(), target: target, clientX: xRandom, clientY: yRandom });
+      const touchStart = new TouchEvent('touchstart', { bubbles: true, touches: [touchObj] });
+      const touchEnd = new TouchEvent('touchend', { bubbles: true, changedTouches: [touchObj] });
+      target.dispatchEvent(touchStart);
+      target.dispatchEvent(touchEnd);
+      // PointerEvent: pointerdown and pointerup
+      const pointerDown = new PointerEvent('pointerdown', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' });
+      const pointerUp = new PointerEvent('pointerup', { bubbles: true, clientX: xRandom, clientY: yRandom, pointerType: 'mouse' });
+      target.dispatchEvent(pointerDown);
+      target.dispatchEvent(pointerUp);
     }, delay);
     return delay
   }
