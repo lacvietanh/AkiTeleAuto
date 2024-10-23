@@ -67,7 +67,7 @@ class Profile {
     this.wd = new BrowserWindow({
       width: 400, height: 680,
       minHeight: 250, minWidth: 200,
-      maxHeight: 1080, maxWidth: 600,
+      maxHeight: 1920, maxWidth: 600,
       show: true,
       transparent: true,
       frame: false,

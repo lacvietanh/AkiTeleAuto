@@ -29,6 +29,8 @@ mac:
     - NSDocumentsFolderUsageDescription: Application requests access to the user's Documents folder.
     - NSDownloadsFolderUsageDescription: Application requests access to the user's Downloads folder.
   notarize: false
+  target:
+    - dmg
 dmg:
   artifactName: ${name}-${version}-${arch}.${ext}
 linux:
@@ -42,5 +44,7 @@ appImage:
   artifactName: ${name}-${version}.${ext}
 npmRebuild: false
 publish:
-  provider: generic
-  url: https://akivn.net
+  provider: github
+  owner: lacvietanh
+  repo: AkiTeleAuto
+  releaseType: release

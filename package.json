@@ -1,7 +1,7 @@
 {
   "name": "aki.teleauto",
   "productName": "AkiTeleAuto",
-  "version": "2024.10.19",
+  "version": "2024.10.24",
   "description": "AkiAuto Telegram MiniApp Multiple Accounts Manager",
   "main": "./out/main/index.js",
   "author": "LacVietAnh",
@@ -25,7 +25,7 @@
     "@fullhuman/postcss-purgecss": "^6.0.0",
     "cheerio": "^1.0.0",
     "electron-store": "^8.1.0",
-    "electron-updater": "^6.1.7",
+    "electron-updater": "^6.3.9",
     "lodash": "^4.17.21"
   },
   "devDependencies": {

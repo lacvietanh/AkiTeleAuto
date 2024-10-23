@@ -9,6 +9,7 @@
   import { onMounted, computed, reactive, nextTick } from 'vue';
   import { debounce } from 'lodash';
   import AppIcon from '/img/icon.png';
+  import Rating from './Rating.vue';
 
   const windowList = new Map()
   window.windowList = windowList;
@@ -136,7 +137,7 @@
         Profile.list = window.Profiles = mess.data;
         Profile.isLoadingAddNew = false
         break;
-      case "games": Game.list = window.Game = mess.data; Game.highLightFirstAvailable(); break;
+      case "games": Game.list = window.Games = mess.data; Game.highLightFirstAvailable(); break;
       case "gameInfo":
         // console.log('received game info for ', mess.data.gameId); // debug
         let g = Game.list.find(g => g.gameId == mess.data.gameId);
@@ -240,12 +241,26 @@
       <p class="panel-heading py-2">Games/MiniApps <span class="is-size-6">({{ Game.list.length }})</span></p>
       <!-- GAME SEARCH  -->
       <div class="panel-block">
-        <p class="control has-icons-left">
-          <input type="search" class="input is-small is-dark" v-model="Game.searchTerm" @input="Game.updateSearchTerm($event.target.value)" />
-          <span class="icon is-left">
-            <i class="fas fa-search"></i>
-          </span>
-        </p>
+        <div class="field has-addons" style="flex:1">
+          <p class="control has-icons-left is-expanded" style="flex: 1;">
+            <input type="search" class="input is-small is-dark" v-model="Game.searchTerm" @input="Game.updateSearchTerm($event.target.value)" />
+            <span class="icon is-left">
+              <i class="fas fa-search"></i>
+            </span>
+          </p>
+          <p class="control">
+            <button class="button is-small" @click="Game.list.sort((a, b) => b.rating - a.rating);">
+              <span>Rating</span>
+              <span class="icon"><i class="fa-solid fa-arrow-down-wide-short"></i></span>
+            </button>
+          </p>
+          <p class="control">
+            <button class="button is-small" @click="Game.list.sort((a, b) => a.name.localeCompare(b.name))">
+              <span>A-Z</span>
+              <span class="icon"><i class="fa-solid fa-arrow-down-wide-short"></i></span>
+            </button>
+          </p>
+        </div>
       </div>
 
       <!-- instructions  -->
@@ -326,7 +341,7 @@
             <i class="fa-solid fa-gavel fa-lg"></i>
           </button>
 
-          <div class="panelRight">
+          <div class="panelRight mx-2">
             <button :title="'Open ' + g.name + 'in new Window'"
               @click="Game.open(g, 'external')"
               :disabled="g.requireMiniApp || g.requireInApp || Game.isLoadingOpen"
@@ -345,6 +360,9 @@
               <i class="fa-brands fa-telegram fa-xl"></i>
             </button>
           </div>
+          <p class="help">
+            <Rating :rating="g.rating" style="white-space: nowrap;" />
+          </p>
         </div>
       </div>
 
@@ -380,8 +398,6 @@
   }
   .panel-block .panelRight {
     display: flex;
-    margin-left: auto;
-    min-width: 5.4em;
   }
   .panel-block .panelRight button {
     margin: 0 3px;
