@@ -6,13 +6,19 @@
     ipcRenderer.send('log', s)
     if (hereLog == 1) console.log(s);
   }
-  import { onMounted, computed, reactive, nextTick } from 'vue';
+
+  import { onMounted, watch, computed, reactive, nextTick } from 'vue';
   import { debounce } from 'lodash';
   import AppIcon from '/img/icon.png';
   import Rating from './Rating.vue';
 
   const windowList = new Map()
   window.windowList = windowList;
+
+  onMounted(() => {
+    Profile.load();
+    api.ipcGet('games')
+  })
 
   const Profile = reactive({
     list: [],
@@ -48,13 +54,10 @@
     list: [],
 
     highLightFirstAvailable: function () {
-      let hl = () => {
-        document.querySelectorAll('.GAME .panelRight button').forEach(b => b.classList.remove('firstAvailable'));
-        document.querySelectorAll('.GAME .panelRight').forEach(p => {
-          p.querySelector('button:not([disabled])')?.classList.add('firstAvailable');
-        });
-      }
-      nextTick(() => { hl(); setTimeout(hl, 2000) })
+      document.querySelectorAll('.GAME .panelRight button').forEach(b => b.classList.remove('firstAvailable'));
+      document.querySelectorAll('.GAME .panelRight').forEach(p => {
+        p.querySelector('button:not([disabled])')?.classList.add('firstAvailable');
+      });
     }
     , searchTerm: ''
     , filteredGames: computed(() => {
@@ -122,13 +125,13 @@
     updateData: function (gameObj) {
       // under development
     },
-  })
+  });
 
+  watch(() => Game.filteredGames, async () => {
+    await nextTick();  // Đảm bảo Vue đã cập nhật DOM
+    Game.highLightFirstAvailable();
+  });
 
-  onMounted(() => {
-    Profile.load();
-    api.ipcGet('games')
-  })
 
   electron.ipcRenderer.on('data', (ev, mess) => {
     console.log(`ipc Dashboard received "${mess.name}"" data:`, mess.data);
@@ -153,7 +156,9 @@
         break;
     }
   })
+
   electron.ipcRenderer.on('gameWindowLoaded', () => { Game.isLoadingOpen = false; Game.lastClickOpen = '' })
+
 </script>
 
 <template>
