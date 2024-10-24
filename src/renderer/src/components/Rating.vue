@@ -3,7 +3,7 @@
     <i
       v-for="star in maxStars"
       :key="star"
-      :class="['fas', star <= rating ? 'fa-star' : 'fa-star-o']"></i>
+      :class="['fa-star', star <= rating ? 'fa-solid' : 'fa-regular']"></i>
   </div>
 </template>
 
