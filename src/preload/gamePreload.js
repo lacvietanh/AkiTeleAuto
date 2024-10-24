@@ -22,7 +22,7 @@ window.mainLog = function (s, hereLog = 0) {
   if (hereLog == 1) console.log(s);
 }
 window.loadURLbyMain = (url) => api.ipcAction('loadURL', { url: url })
-
+const delay = function (s) { return new Promise(r => { setTimeout(r, s * 1000) }) }
 const waitEleToDo = function (selector, action = (e) => e.click(),
   interval = 300, timeout = 30000) {
   let startTime = Date.now();
@@ -113,6 +113,7 @@ if (process.contextIsolated) {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
     contextBridge.exposeInMainWorld('waitEleToDo', waitEleToDo)
+    contextBridge.exposeInMainWorld('delay', delay)
   } catch (error) {
     console.error(error)
   }
@@ -120,6 +121,7 @@ if (process.contextIsolated) {
   window.electron = electronAPI
   window.api = api
   window.waitEleToDo = waitEleToDo
+  window.delay = delay
 }
 
 // ------ IPC Listen ----
