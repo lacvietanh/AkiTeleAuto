@@ -35,9 +35,12 @@ Note: The project is under development, some features may be updated and complet
 - √ Action button (Open in external window | Open in telegram web as miniapp | Open in Telegram App)
 - √ Auto Click On/Off by Shift + Click
 - √ Bypass CORS & CSP (Some games prevent open inside telegram web by setting CORS and CSP)
+- √ Dashboard: Rating & Sort Game
+
+
+- Rating system: each user can rate a game on a 5-star scale, and the app will calculate the average rating from everyone
 - Auto farm by invidualy game settings: Tap & boost tap, claim & farming, upgrade mining card,...
 - Add more game manually
-- Dashboard: Rating & Sort Game
 - Dashboard: Multi-Select and Batch Action (close all, autoclick all, ...)
 - Profile Manager & Proxy/VPN (each profile has separate IP and social network accounts: facebook, x, telegram, instagram,..)
 - Control and AutoClick work inside iframe (slenium core)
