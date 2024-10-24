@@ -23,7 +23,7 @@ window.mainLog = function (s, hereLog = 0) {
 }
 window.loadURLbyMain = (url) => api.ipcAction('loadURL', { url: url })
 
-const selectEleToDo = function (selector, action = (e) => e.click(),
+const waitEleToDo = function (selector, action = (e) => e.click(),
   interval = 300, timeout = 30000) {
   let startTime = Date.now();
   let timer = setInterval(() => {
@@ -112,12 +112,14 @@ if (process.contextIsolated) {
   try {
     contextBridge.exposeInMainWorld('electron', electronAPI)
     contextBridge.exposeInMainWorld('api', api)
+    contextBridge.exposeInMainWorld('waitEleToDo', waitEleToDo)
   } catch (error) {
     console.error(error)
   }
 } else {
   window.electron = electronAPI
   window.api = api
+  window.waitEleToDo = waitEleToDo
 }
 
 // ------ IPC Listen ----
@@ -248,13 +250,6 @@ function addAkiGamePanel() {
         location.href = OpenInWebURL
       }
 
-      // let sendMessage_Btn = '.tgme_action_button_new.shine'
-      // selectEleToDo(sendMessage_Btn, (btn) => {
-      // let url = btn.href
-      // let tgAddr = encodeURIComponent(url)
-      // let OpenInWebURL = `https://web.telegram.org/k/#?tgaddr=${tgAddr}`
-      // })
-
       // sau khi bấm sẽ chuyển tới trang web.telegram.org
       // hoặc chuyển tới tn bot kèm nút launch riêng 
       // window will reload
@@ -282,9 +277,9 @@ function addAkiGamePanel() {
           console.log('stop wait to click PlayBtn in botchat');
         }, 30000)
       }
-      selectEleToDo(LaunchBtnInPopup)
+      waitEleToDo(LaunchBtnInPopup)
 
-      selectEleToDo(firstIframeGame, (e) => {
+      waitEleToDo(firstIframeGame, (e) => {
         api.ipcAction('gameWindowLoaded')
 
         if (!game.requireMiniApp && forceMode != 'tgweb') {
