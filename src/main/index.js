@@ -228,9 +228,10 @@ class Profile {
 
 // ---------------------- function ----------------------
 function createMainWindow() {
+  const bounds = screen.getPrimaryDisplay().bounds;
   mainWindow = new BrowserWindow({
-    width: 900,
-    height: 768,
+    width: 1024,
+    height: bounds.height,
     minHeight: 250,
     minWidth: 400,
     show: false,
