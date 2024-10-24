@@ -184,40 +184,40 @@
         <a :class="{ 'is-active': Profile.currentTab == 'Edit' }" @click="Profile.currentTab = 'Edit'"> Edit </a>
       </p>
       <div class="vscroll-container">
-        <a v-for="(profile, i) in Profile.list" :key="i" class="panel-block px-2 py-1"
-          :class="{ 'selected': Profile.selected == profile.name }"
-          @click="Profile.selected = profile.name">
+        <a v-for="(p, i) in Profile.list" :key="i" class="panel-block px-2 py-1"
+          :class="{ 'selected': Profile.selected == p.name }"
+          @click="Profile.selected = p.name">
           <div class="counter">
             <span style="width: 2em;" class="help">{{ i + 1 }}</span>
           </div>
           <div class="iconName">
             <span class="panel-icon p-0 is-size-3 mr-4">
-              <figure v-if="profile.avt" class="image" style="height: 40px;width: 40px;">
-                <img class=" is-rounded" :src="profile.avt" />
+              <figure v-if="p.avt" class="image" style="height: 40px;width: 40px;">
+                <img class=" is-rounded" :src="p.avt" @error="() => { p.avt = AppIcon }" />
               </figure>
               <i v-else class="fa-solid fa-user-circle fa-lg"></i>
             </span>
             <div class="is-flex is-justify-content-space-between">
               <div class="name">
-                <p>{{ profile.displayName || 'Name' }}</p>
-                <div class="help">{{ profile.name }}</div>
+                <p>{{ p.displayName || 'Name' }}</p>
+                <div class="help">{{ p.name }}</div>
               </div>
               <div class="name">
-                <p>{{ profile.tagName || '@' }}</p>
-                <span class="help">{{ profile.uid || ':' }}</span>
+                <p>{{ p.tagName || '@' }}</p>
+                <span class="help">{{ p.uid || ':' }}</span>
               </div>
             </div>
             <div>
               <!-- profile window counter  -->
               <span class=""><i class="fa-regular fa-window-maximize"></i></span>
-              <span class="mx-1">{{ profile.windowCount || 0 }}</span>
+              <span class="mx-1">{{ p.windowCount || 0 }}</span>
               <!-- close button  -->
-              <button v-if="profile.windowCount > 0" class="mini button is-ghost">
+              <button v-if="p.windowCount > 0" class="mini button is-ghost">
                 <span><i class=" fa-solid fa-xmark fa-xl"></i></span>
               </button>
               <!-- delete profile button  -->
               <button v-if="Profile.currentTab == 'Edit'" class="px-1"
-                @click.stop="Profile.delete(profile.name)">
+                @click.stop="Profile.delete(p.name)">
                 <span><i class="fa-solid fa-trash has-text-danger"></i></span>
               </button>
             </div>
