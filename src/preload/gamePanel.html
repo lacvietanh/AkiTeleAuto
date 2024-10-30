@@ -372,8 +372,8 @@
         return {
           currentOpen: '' // iframe | external
           , Platform: ''
-          , autoclickms: 50
-          , autoclickRandom: true
+          , autoclickms: 25
+          , autoclickRandom: false
         };
       },
       mounted() {
@@ -381,6 +381,26 @@
         // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
         const match = location.href.match(/tgWebAppPlatform=(.*?)&/);
         this.Platform = match ? match[1] : '';
+        document.addEventListener('mousedown', (ev) => {
+          if (!ev.ctrlKey && !ev.altKey && ev.shiftKey && ev.button === 0) {
+            // shift + Lclick = AutoClick
+            if (api._autoClickInterval == null) {
+              let delay = this.autoclickRandom
+                ? api.autoClick(ev.clientX, ev.clientY)
+                : api.autoClick(ev.clientX, ev.clientY, this.autoclickms)
+              let div = document.createElement('div')
+              div.id = "aki_autoclickLabel"
+              div.innerText = `AUTOCLICK: ${delay}ms`;
+              // move for prevent click target itself:
+              let X = ev.clientX + 10, Y = ev.clientY + 10;
+              div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
+              document.body.appendChild(div)
+            } else {
+              $qs('div#aki_autoclickLabel').remove()
+              clearInterval(api._autoClickInterval); api._autoClickInterval = null
+            }
+          }
+        })
       },
 
       methods: {
@@ -399,7 +419,7 @@
       },
     };
 
-    window.AkiPanel = createApp(App).mount('.AkiTITLEBAR');
+    window.AkiTG = createApp(App).mount('.AkiTITLEBAR');
   </script>
 </body>
 

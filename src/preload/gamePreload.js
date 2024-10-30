@@ -82,8 +82,7 @@ const api = {
     return Math.floor(Math.random() * (max - min + 1)) + min;
   },
 
-  autoClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2) {
-    const delay = api.randomRange(30, 120);
+  autoClick: function (x = window.innerWidth / 2, y = window.innerHeight / 2, delay = api.randomRange(30, 90)) {
     api._autoClickInterval = setInterval(() => {
       const target = document.elementFromPoint(x, y);
       const range = 50; // random range
@@ -136,22 +135,7 @@ electron.ipcRenderer.on('data', (ev, mess) => {
 });
 
 document.addEventListener('mousedown', function (ev) {
-  if (!ev.ctrlKey && !ev.altKey && ev.shiftKey && ev.button === 0) {
-    // shift + Lclick = AutoClick
-    if (api._autoClickInterval == null) {
-      let delay = api.autoClick(ev.clientX, ev.clientY)
-      let div = document.createElement('div')
-      div.id = "aki_autoclickLabel"
-      div.innerText = `AUTOCLICK: ${delay}ms`;
-      // move for prevent click target itself:
-      let X = ev.clientX + 10, Y = ev.clientY + 10;
-      div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
-      document.body.appendChild(div)
-    } else {
-      $qs('div#aki_autoclickLabel').remove()
-      clearInterval(api._autoClickInterval); api._autoClickInterval = null
-    }
-  } else if (ev.ctrlKey && ev.altKey && !ev.shiftKey) {
+  if (ev.ctrlKey && ev.altKey && !ev.shiftKey) {
     // ctrl + alt + Lclick = InspectElement
     api.InspectAtMouse(ev.clientX, ev.clientY)
   }
