@@ -49,9 +49,36 @@
     }
   });
 
-
   const Game = reactive({
-    list: [],
+    list: []
+    , sorts: {
+      rating: { field: 'rating', asc: true }
+      , name: { field: 'name', asc: true }
+      , myPriority: { field: 'myPriority', asc: true }
+    }
+    , currentSort: 'name'
+    , sorterIconDirection: (field) => {
+      let asc = Game.sorts[field].asc
+      let dir = asc ? 'down' : 'up'
+      return `fa-solid fa-arrow-${dir}-wide-short`
+    }
+    , sort: function (type = 'rating') {
+      if (Game.currentSort === type) {
+        Game.sorts[type].asc = !Game.sorts[type].asc;
+      } else {
+        Game.currentSort = type; Game.sorts[type].asc = true;
+      }
+      const sort = Game.sorts[Game.currentSort];
+      Game.list.sort((a, b) => {
+        const mod = sort.asc ? 1 : -1;
+        if (sort.field === 'rating') {
+          return mod * (b.rating - a.rating);
+        } else {
+          return mod * a[sort.field].localeCompare(b[sort.field]);
+        }
+      });
+
+    },
 
     highLightFirstAvailable: function () {
       document.querySelectorAll('.GAME .panelRight button').forEach(b => b.classList.remove('firstAvailable'));
@@ -254,15 +281,15 @@
             </span>
           </p>
           <p class="control">
-            <button class="button is-small" @click="Game.list.sort((a, b) => b.rating - a.rating);">
+            <button :class="['button is-small', { 'is-primary': Game.currentSort == 'rating' }]" @click="Game.sort('rating')">
               <span>Rating</span>
-              <span class="icon"><i class="fa-solid fa-arrow-down-wide-short"></i></span>
+              <span class="icon"><i :class="Game.sorterIconDirection('rating')"></i></span>
             </button>
           </p>
           <p class="control">
-            <button class="button is-small" @click="Game.list.sort((a, b) => a.name.localeCompare(b.name))">
+            <button :class="['button is-small', { 'is-primary': Game.currentSort == 'name' }]" @click="Game.sort('name')">
               <span>A-Z</span>
-              <span class="icon"><i class="fa-solid fa-arrow-down-wide-short"></i></span>
+              <span class="icon"><i :class="Game.sorterIconDirection('name')"></i></span>
             </button>
           </p>
         </div>
