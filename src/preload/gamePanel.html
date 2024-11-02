@@ -202,7 +202,10 @@
       <button class="min" title="Minimize" onclick="api.ipcAction('minizethiswindow')">&nbsp;</button>
       <button class="max" title="Back" onclick="history.go(-1);" style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">&larr;</button>
       <button class="separator" style="opacity: 0; width: 2em;"></button>
-      <button class="utils autoClick" title="autoClick" onclick=";" style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">
+      <button :class="['utils autoClick', {'active':autoclickActive}]"
+        :title="autoclickActive ? 'autoClick is running' : 'autoClick'"
+        @click="autoclickToggle"
+        style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">
         <i class="fa-regular fa-hand-pointer"></i>
       </button>
       <button class="utils mouseSync" title="Mouse Sync" onclick=";" style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">
@@ -374,6 +377,7 @@
           , Platform: ''
           , autoclickms: 25
           , autoclickRandom: false
+          , autoclickActive: false
         };
       },
       mounted() {
@@ -384,21 +388,7 @@
         document.addEventListener('mousedown', (ev) => {
           if (!ev.ctrlKey && !ev.altKey && ev.shiftKey && ev.button === 0) {
             // shift + Lclick = AutoClick
-            if (api._autoClickInterval == null) {
-              let delay = this.autoclickRandom
-                ? api.autoClick(ev.clientX, ev.clientY)
-                : api.autoClick(ev.clientX, ev.clientY, this.autoclickms)
-              let div = document.createElement('div')
-              div.id = "aki_autoclickLabel"
-              div.innerText = `AUTOCLICK: ${delay}ms`;
-              // move for prevent click target itself:
-              let X = ev.clientX + 10, Y = ev.clientY + 10;
-              div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
-              document.body.appendChild(div)
-            } else {
-              $qs('div#aki_autoclickLabel').remove()
-              clearInterval(api._autoClickInterval); api._autoClickInterval = null
-            }
+            this.autoclickToggle(ev.clientX, ev.clientY)
           }
         })
       },
@@ -414,6 +404,25 @@
           } else {
             alert('No tgWebAppPlatform detect in url')
             this.Platform = ''
+          }
+        },
+        autoclickToggle(x, y) {
+          if (api._autoClickInterval == null) {
+            let delay = this.autoclickRandom
+              ? api.autoClick(x, y)
+              : api.autoClick(x, y, this.autoclickms)
+            let div = document.createElement('div')
+            div.id = "aki_autoclickLabel"
+            div.innerText = `AUTOCLICK: ${delay}ms`;
+            // move for prevent click target itself:
+            let X = x + 10, Y = y + 10;
+            div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
+            document.body.appendChild(div)
+            this.autoclickActive = true
+          } else {
+            $qs('div#aki_autoclickLabel').remove()
+            clearInterval(api._autoClickInterval); api._autoClickInterval = null
+            this.autoclickActive = false
           }
         }
       },
