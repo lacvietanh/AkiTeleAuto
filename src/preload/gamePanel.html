@@ -202,9 +202,10 @@
       <button class="min" title="Minimize" onclick="api.ipcAction('minizethiswindow')">&nbsp;</button>
       <button class="max" title="Back" onclick="history.go(-1);" style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">&larr;</button>
       <button class="separator" style="opacity: 0; width: 2em;"></button>
-      <button :class="['utils autoClick', {'active':autoclickActive}]"
-        :title="autoclickActive ? 'autoClick is running' : 'autoClick'"
-        @click="autoclickToggle"
+      <button :class="['utils autoClick', {'active':autoClick.active}]"
+        :disabled="currentOpen=='iframe'"
+        :title="autoClick.active ? 'autoClick is running' : 'autoClick'"
+        @click="autoClick.toggle"
         style="font-size: 0.9em;width: 17px;height: 17px;position: relative;top: -4px;">
         <i class="fa-regular fa-hand-pointer"></i>
       </button>
@@ -260,16 +261,16 @@
           <div class="field has-addons">
             <p class="control mx-5">
               <label class="">
-                <input type="checkbox" v-model="autoclickRandom" />
+                <input type="checkbox" v-model="autoClick.random" />
                 Random
               </label>
             </p>
-            <p :class="['control mr-2',{'has-text-grey-lighter':autoclickRandom}]">Constant:</p>
+            <p :class="['control mr-2',{'has-text-grey-lighter':autoClick.random}]">Constant:</p>
             <p class="control pt-1">
-              <input type="range" min="30" max="1000" name="autoclickms" v-model="autoclickms" :disabled="autoclickRandom">
+              <input type="range" min="30" max="1000" name="autoclickms" v-model="autoClick.delay" :disabled="autoClick.random">
             </p>
             <p class="control mx-2">
-              <span :class="['help',{'has-text-grey-lighter':autoclickRandom}]">{{ autoclickms }}ms</span>
+              <span :class="['help',{'has-text-grey-lighter':autoClick.random}]">{{ autoClick.delay }}ms</span>
             </p>
           </div>
         </div>
@@ -375,9 +376,12 @@
         return {
           currentOpen: '' // iframe | external
           , Platform: ''
-          , autoclickms: 25
-          , autoclickRandom: false
-          , autoclickActive: false
+          , autoClick: {
+            delay: 25
+            , random: false
+            , active: false
+            , disable: false
+          }
         };
       },
       mounted() {
@@ -408,9 +412,9 @@
         },
         autoclickToggle(x, y) {
           if (api._autoClickInterval == null) {
-            let delay = this.autoclickRandom
+            let delay = this.autoClick.random
               ? api.autoClick(x, y)
-              : api.autoClick(x, y, this.autoclickms)
+              : api.autoClick(x, y, this.autoClick.delay)
             let div = document.createElement('div')
             div.id = "aki_autoclickLabel"
             div.innerText = `AUTOCLICK: ${delay}ms`;
@@ -418,11 +422,11 @@
             let X = x + 10, Y = y + 10;
             div.style = `position:fixed;top:${Y}px;left:${X}px;color: red;text-shadow: yellow 0px 0px 2px;user-select: none;z-index: 9999;font-weight: bold;`;
             document.body.appendChild(div)
-            this.autoclickActive = true
+            this.autoClick.active = true
           } else {
             $qs('div#aki_autoclickLabel').remove()
             clearInterval(api._autoClickInterval); api._autoClickInterval = null
-            this.autoclickActive = false
+            this.autoClick.active = false
           }
         }
       },
