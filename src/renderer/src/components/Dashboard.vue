@@ -168,17 +168,9 @@
         Profile.isLoadingAddNew = false
         break;
       case "games":
-        // const processedGames = mess.data.map(game => {
-        //   for (const key in game.earn.game) {
-        //     if (typeof game.earn.game[key] === "string") {
-        //       game.earn.game[key] = new Function("return " + game.earn.game[key])();
-        //       game.earn.game[key].functionName = key; // Gắn tên hàm
-        //     }
-        //   }
-        //   return game;
-        // });
         Game.list = window.Games = mess.data;
         Game.highLightFirstAvailable();
+        Game.sort('rating');
         break;
       case "gameInfo":
         // console.log('received game info for ', mess.data.gameId); // debug

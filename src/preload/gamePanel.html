@@ -228,7 +228,7 @@
               </button>
             </p>
             <p class="control">
-              <button class="button is-small pl-1">
+              <button class="button is-small pl-1" @click="openInTeleWeb">
                 <span class="mr-1"><i class="fa-solid fa-layer-group"></i></span>
                 <span>TG Web</span>
               </button>
@@ -383,7 +383,7 @@
         <!-- endAuto  -->
       </div>
     </div>
-    <div id="AkiTele_TitleName"></div>
+    <div id="AkiTele_ProfileName"></div>
   </div>
 
 
@@ -394,6 +394,7 @@
       data() {
         return {
           gameId: ''
+          , profileId: ''
           , game: {
             earn: {
               tap: true,
@@ -418,11 +419,12 @@
           }
           , auto: {
             farm: null, tapBoost: null, games: []
-          }
+          },
         };
       },
       mounted() {
         this.gameId = this.$el.parentElement.dataset.gameId;
+        this.profileId = window.Aki_ProfileId
         this.currentOpen = location.host == 'web.telegram.org' ? 'iframe' : 'external'
         // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
         const match = location.href.match(/tgWebAppPlatform=(.*?)&/);
@@ -462,6 +464,15 @@
             alert('No tgWebAppPlatform detect in url')
             this.Platform = ''
           }
+        },
+        openInTeleWeb() {
+          api.ipcAction('openGame', {
+            profileid: this.profileId,
+            link: this.game.link,
+            gameId: this.game.gameId,
+            forceMode: "tgweb"
+          })
+          api.ipcAction('closethiswindow')
         },
         autoclickToggle(x, y) {
           if (api._autoClickInterval == null) {

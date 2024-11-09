@@ -4,6 +4,9 @@ const fs = require('fs');
 const path = require('path')
 const cheerio = require('cheerio');
 
+console.log(process.argv);
+
+
 let wdType = process.argv.filter(arg => arg.startsWith('--akiWindowType='))[0]
   .split('=')[1] // loginWindow || gameWindow
 let gameId = process.argv.filter(arg => arg.startsWith('--akiGameId='))[0]
@@ -127,8 +130,10 @@ if (process.contextIsolated) {
 electron.ipcRenderer.on('data', (ev, mess) => {
   mainLog('ipcRenderer received DATA name:' + mess.name + ' : ' + mess.data);
   switch (mess.name) {
-    case 'profileDisplayName':
-      $qs('#AkiTele_TitleName').innerText = mess.data; break;
+    case 'profileInfo':
+      $qs('#AkiTele_ProfileName').innerText = mess.data.name;
+      window.Aki_ProfileId = mess.data.id;
+      break;
     default: console.log(mess.name, ' is not defined')
       break;
   }

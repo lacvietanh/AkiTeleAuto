@@ -104,7 +104,10 @@ class Profile {
     this.wd.setTitle(`${displayName} | ${gameId}`)
     this.wd.webContents.on("page-title-updated", (ev) => { ev.preventDefault() })
     this.wd.webContents.on("dom-ready", () => {
-      this.wd.webContents.send('data', { name: 'profileDisplayName', data: displayName.slice(0, 10) })
+      this.wd.webContents.send('data', {
+        name: 'profileInfo', data:
+          { name: displayName.slice(0, 10), id: this.id }
+      })
     }, { once: true });
     this.wd.loadURL(url)
 
