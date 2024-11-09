@@ -256,7 +256,7 @@
 
 
         <!-- AutoClick -->
-        <div class="my-3 mt-4">
+        <div class="my-3 mt-2">
           AutoClick: (under development)
           <div class="field has-addons">
             <p class="control mx-5">
@@ -276,7 +276,7 @@
         </div>
 
         <!-- Reminder -->
-        <div class="my-3">
+        <div class="my-2">
           Reminder: (under development)
           <div class="field has-addons">
             <p class="control"><a class="button is-small is-static">After</a></p>
@@ -318,7 +318,7 @@
         <div class="my-3">
           Auto: (under development)
           <div class="is-flex is-flex-wrap-wrap">
-            <div class="field has-addons mx-1">
+            <div v-if="!isEmpty(auto.farm)" class="field has-addons mx-1">
               <p class="control">
                 <button class="button is-small pl-1">
                   <span class="mr-1"><i class=""></i></span>
@@ -330,6 +330,7 @@
                 <input class="input is-small has-background-grey" type="time">
               </p>
               <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+              <p class="control"> <button @click="auto.farm" class="button is-small is-success"> RUN </button> </p>
             </div>
 
             <div class="field has-addons mx-1">
@@ -360,11 +361,29 @@
               <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
             </div>
           </div>
-        </div>
+          Game Earn:
+          <div v-for="(g,i) in auto.games" :key="i" class="field has-addons mx-1">
+            <div v-if="!isEmpty(game.earn.game[g])" class="field has-addons mx-1">
+              <p class="control">
+                <button class="button is-small pl-1">
+                  <span class="mr-1"><i class=""></i></span>
+                  <span>{{g}}</span>
+                </button>
+              </p>
+              <p class="control"><a class="button is-small is-static px-1">After</a></p>
+              <p class="control">
+                <input class="input is-small has-background-grey" type="time">
+              </p>
+              <p class="control"> <button class="button is-small is-warning"> SET </button> </p>
+              <p class="control"> <button @click="game.earn.game[g]" class="button is-small is-success"> RUN </button> </p>
+            </div>
+          </div>
 
+        </div>
+        <!-- endAuto  -->
       </div>
     </div>
-    <div id="AkiTele_TitleName">Tao || Game</div>
+    <div id="AkiTele_TitleName"></div>
   </div>
 
 
@@ -374,7 +393,22 @@
     const App = {
       data() {
         return {
-          currentOpen: '' // iframe | external
+          gameId: ''
+          , game: {
+            earn: {
+              tap: true,
+              boost: [], // sequence element to click
+              task: [],
+              farmClaim: function () { },
+              game: {
+                spiner: [], // sequence element to click
+                itemDropCatch: {}
+                // others specific function for some games...
+              }
+            },
+            mineCard: [], // element list
+          }
+          , currentOpen: '' // iframe | external
           , Platform: ''
           , autoClick: {
             delay: 25
@@ -382,9 +416,13 @@
             , active: false
             , disable: false
           }
+          , auto: {
+            farm: null, tapBoost: null, games: []
+          }
         };
       },
       mounted() {
+        this.gameId = this.$el.parentElement.dataset.gameId;
         this.currentOpen = location.host == 'web.telegram.org' ? 'iframe' : 'external'
         // need implement case "in tgweb (miniapp)" by check host 'web.telegram.org'
         const match = location.href.match(/tgWebAppPlatform=(.*?)&/);
@@ -394,6 +432,21 @@
             // shift + Lclick = AutoClick
             this.autoclickToggle(ev.clientX, ev.clientY)
           }
+        })
+
+        electron.ipcRenderer.invoke('get-game-data', this.gameId).then(data => {
+          console.log('data', data);
+          let earn = data.earn
+          for (const key in earn.game) {
+            this.auto.games.push(key)
+            console.log('Special Game Earn:', key);
+            if (typeof earn.game[key] === "string") {
+              earn.game[key] = new Function("return " + earn.game[key])();
+              earn.game[key].functionName = key;
+            }
+          }
+          this.auto.farm = new Function("return " + earn.farmClaim)();
+          Object.assign(this.game, data)
         })
       },
 
@@ -428,6 +481,16 @@
             clearInterval(api._autoClickInterval); api._autoClickInterval = null
             this.autoClick.active = false
           }
+        },
+        isEmpty(obj) {
+          console.log('check empty for:', obj);
+
+          if (obj == null) return true;
+          if (typeof obj === 'object')
+            return Object.keys(obj).length === 0;
+          if (typeof obj === 'function')
+            return obj.toString().replace(/\s+/g, '') === 'function(){}';
+          return false;
         }
       },
     };
