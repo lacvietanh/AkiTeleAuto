@@ -342,7 +342,11 @@ app.whenReady().then(() => {
   })
 
   ipcMain.handle('get-game-data', (ev, gameId) => {
-    // gameWindow sẽ gọi cái này 2 lần
+    /* gameWindow will call this 3 times:
+    1. check requireInApp to lock window.protoUrl
+    2. check launchInBotChat, requireMiniApp or forceMode
+    3. gamePanel call to get data inside vue3 panel (AkiTG Object)
+    */
     let g = Game.list.find(g => g.gameId == gameId);
     // console.log('requested game data from ', ev.sender.getURL().slice(0, 30), g); //debug
     return g
