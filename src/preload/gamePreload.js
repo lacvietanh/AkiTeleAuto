@@ -173,6 +173,7 @@ function addAkiGamePanel() {
     // CREATE PANEL:
     const panel = document.createElement('div');
     panel.className = 'AkiTITLEBAR';
+    panel.dataset.gameId = gameId
     panel.innerHTML = $('div.AkiTITLEBAR').html();
     document.body.appendChild(panel);
 
@@ -257,7 +258,7 @@ function addAkiGamePanel() {
             clearInterval(Inteval_)
             console.log('clicked PlayBtn in botchat & stop wait');
           }
-        }, 3000);
+        }, 4000);
         setTimeout(() => {
           clearInterval(Inteval_)
           console.log('stop wait to click PlayBtn in botchat');
