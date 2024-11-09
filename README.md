@@ -1,7 +1,6 @@
 # akitgauto - Aki Tele Auto
 ## Telegram MiniApp Management and Auto Farm
-![image](https://github.com/user-attachments/assets/532cdbdd-f30b-4290-b99f-af49ba59b7d6)
-![image](https://github.com/user-attachments/assets/705617ea-faea-46bc-b651-510c050cf1f1)
+![Screenshot 2024-11-09 at 21 28 44](https://github.com/user-attachments/assets/57c1647f-f412-4b6e-8812-20b7b6614b7f)
 ![image](https://github.com/user-attachments/assets/dda8a3d4-f2d5-4722-9fa1-3636bec8e78c)
 ![autoclick](https://github.com/user-attachments/assets/f68797f3-da45-4e36-b13d-646a08e741ee)
 
@@ -37,7 +36,8 @@ Note: The project is under development, some features may be updated and complet
 - √ Bypass CORS & CSP (Some games prevent open inside telegram web by setting CORS and CSP)
 - √ Dashboard: Rating & Sort Game
 
-
+- AutoUpdate
+- Official website
 - Rating system: each user can rate a game on a 5-star scale, and the app will calculate the average rating from everyone
 - Auto farm by invidualy game settings: Tap & boost tap, claim & farming, upgrade mining card,...
 - Add more game manually
