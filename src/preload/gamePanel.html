@@ -222,22 +222,22 @@
           Open As...
           <div class="field has-addons">
             <p class="control">
-              <button class="button is-small pl-1" :disabled="currentOpen=='external'" onclick="api.openIFrameURL()">
+              <button :class="['button is-small pl-1',{'has-text-grey':currentOpen=='external'}]" :disabled="currentOpen=='external'" onclick="api.openIFrameURL()">
                 <span class="mr-1"><i class="fa-solid fa-rocket"></i></span>
                 <span>External</span>
               </button>
             </p>
             <p class="control">
-              <button class="button is-small pl-1" @click="openInTeleWeb">
+              <button :class="['button is-small pl-1',{'has-text-grey':currentOpen=='iframe'}]" :disabled="currentOpen=='iframe'" @click="openInTeleWeb">
                 <span class="mr-1"><i class="fa-solid fa-layer-group"></i></span>
                 <span>TG Web</span>
               </button>
             </p>
             <p class="control">
-              <button class="button is-small pl-1">
+              <a class="button is-small pl-1" :href="game.tgAddr" onclick="api.ipcAction('closethiswindow')">
                 <span class="mr-1"><i class="fa-brands fa-telegram fa-lg"></i></span>
                 <span>TG App</span>
-              </button>
+              </a>
             </p>
             <p class="control">
               <span class="select is-small">
@@ -394,7 +394,9 @@
       data() {
         return {
           gameId: ''
+          , Platform: ''
           , profileId: ''
+          , currentOpen: '' // iframe | external
           , game: {
             earn: {
               tap: true,
@@ -409,8 +411,6 @@
             },
             mineCard: [], // element list
           }
-          , currentOpen: '' // iframe | external
-          , Platform: ''
           , autoClick: {
             delay: 25
             , random: false
