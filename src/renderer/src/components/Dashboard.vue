@@ -167,7 +167,19 @@
         Profile.list = window.Profiles = mess.data;
         Profile.isLoadingAddNew = false
         break;
-      case "games": Game.list = window.Games = mess.data; Game.highLightFirstAvailable(); break;
+      case "games":
+        // const processedGames = mess.data.map(game => {
+        //   for (const key in game.earn.game) {
+        //     if (typeof game.earn.game[key] === "string") {
+        //       game.earn.game[key] = new Function("return " + game.earn.game[key])();
+        //       game.earn.game[key].functionName = key; // Gắn tên hàm
+        //     }
+        //   }
+        //   return game;
+        // });
+        Game.list = window.Games = mess.data;
+        Game.highLightFirstAvailable();
+        break;
       case "gameInfo":
         // console.log('received game info for ', mess.data.gameId); // debug
         let g = Game.list.find(g => g.gameId == mess.data.gameId);
