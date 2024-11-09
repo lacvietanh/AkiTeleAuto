@@ -1,7 +1,7 @@
 {
   "name": "aki.teleauto",
   "productName": "AkiTeleAuto",
-  "version": "2024.11.02",
+  "version": "2024.11.09",
   "description": "AkiAuto Telegram MiniApp Multiple Accounts Manager",
   "main": "./out/main/index.js",
   "author": "LacVietAnh",

@@ -1,6 +1,23 @@
 import Store from 'electron-store';
 const store = new Store();
 
+function deepMerge(target, source) {
+  for (const key in source) {
+    if (source[key] && typeof source[key] === 'object' && !Array.isArray(source[key])) {
+      // Nếu là một đối tượng, tiếp tục gộp đệ quy
+      if (!target[key] || typeof target[key] !== 'object') {
+        target[key] = {};
+      }
+      deepMerge(target[key], source[key]);
+    } else {
+      // Nếu không phải đối tượng, sao chép giá trị
+      target[key] = source[key];
+    }
+  }
+  return target;
+}
+
+
 // requireInApp -> requireMiniApp -> requireMobile
 let preConfig = [
   {
@@ -40,6 +57,12 @@ let preConfig = [
   {
     name: "DROP", link: "https://t.me/drops_coin_bot/drops?startapp=YoHK9xAK"
     , rating: 4
+    , earn: {
+      farmClaim: function () {
+        let btn = 'main > div > div.relative.bottom-0.left-0.right-0.z-20 > div > button'
+        waitEleToDo(btn)
+      }
+    }
   },
   {
     name: "NotBoredPuppies", link: "https://t.me/NotBoredPuppies_bot/app?start=r_1617075783"
@@ -50,71 +73,71 @@ let preConfig = [
     name: "Major", link: "https://t.me/major/start?startapp=1617075783"
     , rating: 5
     , earn: {
-      // game: {
-      //   hold: function () {
-      //     function majorHold(sec = 62) {
-      //       const target = $qs('div.clock');
-      //       if (target) {
-      //         const rect = target.getBoundingClientRect();
-      //         const x = rect.left + (rect.width / 2);
-      //         const y = rect.top + (rect.height / 2);
+      game: {
+        hold: function () {
+          function majorHold(sec = 62) {
+            const target = $qs('div.clock');
+            if (target) {
+              const rect = target.getBoundingClientRect();
+              const x = rect.left + (rect.width / 2);
+              const y = rect.top + (rect.height / 2);
 
-      //         const mouseDown = new MouseEvent('mousedown', { bubbles: true, clientX: x, clientY: y });
-      //         const mouseMove = new MouseEvent('mousemove', { bubbles: true, clientX: x, clientY: y });
-      //         const mouseUp = new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y });
+              const mouseDown = new MouseEvent('mousedown', { bubbles: true, clientX: x, clientY: y });
+              const mouseMove = new MouseEvent('mousemove', { bubbles: true, clientX: x, clientY: y });
+              const mouseUp = new MouseEvent('mouseup', { bubbles: true, clientX: x, clientY: y });
 
-      //         const touchObj = new Touch({ identifier: Date.now(), target: target, clientX: x, clientY: y });
-      //         const touchStart = new TouchEvent('touchstart', { bubbles: true, touches: [touchObj] });
-      //         const touchEnd = new TouchEvent('touchend', { bubbles: true, changedTouches: [touchObj] });
+              const touchObj = new Touch({ identifier: Date.now(), target: target, clientX: x, clientY: y });
+              const touchStart = new TouchEvent('touchstart', { bubbles: true, touches: [touchObj] });
+              const touchEnd = new TouchEvent('touchend', { bubbles: true, changedTouches: [touchObj] });
 
-      //         const pointerDown = new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y, pointerType: 'mouse' });
-      //         const pointerUp = new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y, pointerType: 'mouse' });
+              const pointerDown = new PointerEvent('pointerdown', { bubbles: true, clientX: x, clientY: y, pointerType: 'mouse' });
+              const pointerUp = new PointerEvent('pointerup', { bubbles: true, clientX: x, clientY: y, pointerType: 'mouse' });
 
-      //         target.dispatchEvent(mouseDown);
-      //         target.dispatchEvent(touchStart);
-      //         target.dispatchEvent(pointerDown);
-      //         target.dispatchEvent(mouseMove);
+              target.dispatchEvent(mouseDown);
+              target.dispatchEvent(touchStart);
+              target.dispatchEvent(pointerDown);
+              target.dispatchEvent(mouseMove);
 
-      //         setTimeout(() => {
-      //           target.dispatchEvent(mouseUp);
-      //           target.dispatchEvent(touchEnd);
-      //           target.dispatchEvent(pointerUp);
-      //         }, sec * 1000);
-      //       }
-      //     }
-      //     majorHold();
-      //   },
-      //   sweeper: function () {
-      //     function majorSweep() {
-      //       if (location.href != 'https://major.bot/games/swipe-coin') {
-      //         alert('need go to sweeper game..')
-      //         location.href = 'https://major.bot/games/swipe-coin'
-      //         return
-      //       } else {
-      //         function simulateMouseMove() {
-      //           let CoinElements = document.querySelectorAll('div.coin');
-      //           CoinElements.forEach((el, index) => {
-      //             const rect = el.getBoundingClientRect();
-      //             const x = rect.left + (rect.width / 2);
-      //             const y = rect.top + (rect.height / 2);
-      //             const mouseOver = new MouseEvent('mouseover', { bubbles: true, clientX: x, clientY: y });
-      //             const mouseEnter = new MouseEvent('mouseenter', { bubbles: true, clientX: x, clientY: y });
-      //             const mouseMove = new MouseEvent('mousemove', { bubbles: true, clientX: x, clientY: y });
-      //             el.dispatchEvent(mouseEnter);
-      //             el.dispatchEvent(mouseOver);
-      //             el.dispatchEvent(mouseMove);
-      //             const mouseLeave = new MouseEvent('mouseleave', { bubbles: true, clientX: x, clientY: y });
-      //             setTimeout(() => el.dispatchEvent(mouseLeave), 250);
-      //           });
-      //         }
-      //         window.MajorSweeper = setInterval(simulateMouseMove, 253)
-      //         setTimeout(() => { clearInterval(window.MajorSweeper) }, 60000)
-      //       }
-      //     }
-      //     majorSweep()
+              setTimeout(() => {
+                target.dispatchEvent(mouseUp);
+                target.dispatchEvent(touchEnd);
+                target.dispatchEvent(pointerUp);
+              }, sec * 1000);
+            }
+          }
+          majorHold();
+        },
+        sweeper: function () {
+          function majorSweep() {
+            if (location.href != 'https://major.bot/games/swipe-coin') {
+              alert('need go to sweeper game..')
+              location.href = 'https://major.bot/games/swipe-coin'
+              return
+            } else {
+              function simulateMouseMove() {
+                let CoinElements = document.querySelectorAll('div.coin');
+                CoinElements.forEach((el, index) => {
+                  const rect = el.getBoundingClientRect();
+                  const x = rect.left + (rect.width / 2);
+                  const y = rect.top + (rect.height / 2);
+                  const mouseOver = new MouseEvent('mouseover', { bubbles: true, clientX: x, clientY: y });
+                  const mouseEnter = new MouseEvent('mouseenter', { bubbles: true, clientX: x, clientY: y });
+                  const mouseMove = new MouseEvent('mousemove', { bubbles: true, clientX: x, clientY: y });
+                  el.dispatchEvent(mouseEnter);
+                  el.dispatchEvent(mouseOver);
+                  el.dispatchEvent(mouseMove);
+                  const mouseLeave = new MouseEvent('mouseleave', { bubbles: true, clientX: x, clientY: y });
+                  setTimeout(() => el.dispatchEvent(mouseLeave), 253);
+                });
+              }
+              window.MajorSweeper = setInterval(simulateMouseMove, 253)
+              setTimeout(() => { clearInterval(window.MajorSweeper) }, 60000)
+            }
+          }
+          majorSweep()
 
-      //   }
-      // }
+        }
+      }
     }
   },
   {
@@ -171,7 +194,20 @@ let preConfig = [
   },
   {
     name: "Birds", link: "https://t.me/birdx2_bot/birdx?startapp=1617075783"
-    , rating: 5
+    , rating: 5,
+    earn: {
+      game: {
+        birdEggBreak: async function () {
+          for (i = 0; i < 10; i++) {
+            let n = api.randomRange(1, 2);
+            $qs(`img[alt="egg${n}"]`).click()
+            await new Promise(r => { setTimeout(() => { r() }, 1000) });
+            $qs('button.z-0.group[type="button"]').click()
+            await new Promise(r => { setTimeout(() => { r() }, 1000) });
+          }
+        }
+      }
+    }
   },
   {
     name: "Memeland", link: "https://t.me/metaland_bot/click?startapp=1617075783"
@@ -188,7 +224,7 @@ let preConfig = [
   {
     name: "CatsDogs", link: "https://t.me/catsdogs_game_bot/join?startapp=1617075783"
     , requireMiniApp: true
-    , rating: 3
+    , rating: 4
   },
   {
     name: "MatchQuest", link: "https://t.me/MatchQuestBot/start?startapp=a4427cb30850105ed404fa8e2b64f3bb"
@@ -207,12 +243,12 @@ let preConfig = [
   {
     name: "TimeFarm", link: "https://t.me/TimeFarmCryptoBot?start=ewpWKMx5QA1Vjm3m"
     , launchBtnInBotChat: '.is-web-view.reply-markup-button.rp'
-    , rating: 4
+    , rating: 5
   },
   {
     name: "Fintopio", link: "https://t.me/fintopio/wallet?startapp=reflink-reflink_h5vWbSndCMoyEBSG-"
     , requireMiniApp: true
-    , rating: 4
+    , rating: 5
   },
   {
     name: "TON Kombat", link: "https://t.me/Ton_kombat_bot/app?startapp=1617075783"
@@ -250,6 +286,10 @@ let preConfig = [
     , rating: 5
   },
   {
+    name: "SnakeHouse", link: "https://t.me/Snakeshouselive_bot/snakes?startapp=EfYg5VRqtW"
+    , rating: 5
+  },
+  {
     name: "ZESH", link: "https://t.me/ZeshToTheMoonBot?start=PY8PHZHi7Vtz",
     launchBtnInBotChat: '.new-message-bot-commands.is-view'
     , requireMiniApp: true
@@ -272,16 +312,24 @@ class Game {
 
       dailyCheckIn: [], // sequence element to click
       earn: {
-        tap: true, boost: [], // sequence element to click
+        tapBoost: function () { },
         task: [],
+        farmClaim: function () { },
         game: {
           spiner: [], // sequence element to click
           itemDropCatch: {}
+          // others specific function for some games...
         }
       },
       mineCard: [], // element list
     };
-    Object.assign(this, defaultConfig, gameObj);
+    deepMerge(this, defaultConfig);
+    deepMerge(this, gameObj);
+
+    // Convert all functions in earn.game to strings
+    this._convertFunctionsToStrings(this.earn.game);
+    this.earn.farmClaim = this.earn.farmClaim.toString().trim();
+    this.earn.tapBoost = this.earn.tapBoost.toString().trim();
 
     if (this.link?.startsWith('t.me')) this.link = 'https://' + this.link;
     if (this.link?.startsWith('http')) this.link = this.link.replace('http://', 'https://');
@@ -292,6 +340,14 @@ class Game {
     // console.log(this.gameId);
     this.tgAddr = Game.convertTgAddr(this.link)
     return this
+  }
+
+  _convertFunctionsToStrings(obj) {
+    for (const key in obj) {
+      if (typeof obj[key] === 'function') {
+        obj[key] = obj[key].toString().trim();
+      }
+    }
   }
 
   static list = [];
